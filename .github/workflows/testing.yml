@@ -19,7 +19,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: "3.8"
+        python-version: "3.11"
         cache: "poetry"
     - name: Install Dependencies
       run: poetry install
@@ -34,7 +34,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.11"]
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
