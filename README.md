@@ -1,3 +1,3 @@
 # ZlsNasDisplay
 
-Eink display manager
+NAS Eink display manager
