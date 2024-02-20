@@ -17,9 +17,10 @@ sentry_sdk.init("https://c23614af051048d6866787f8338d15c0@glitchtip.zales.dev/1"
 
 display_renderer = DisplayRenderer()
 
+
 # Define signal_handler function to catch SIGINT (Ctrl+C)
 def signal_handler(sig, frame):
-    """ Signal handler function to catch SIGINT (Ctrl+C) and exit the program."""
+    """Signal handler function to catch SIGINT (Ctrl+C) and exit the program."""
     logging.info("Exiting the program...")
     # Clear all scheduled jobs
     schedule.clear()
@@ -32,8 +33,9 @@ def signal_handler(sig, frame):
 
     sys.exit(0)
 
+
 def main():
-    """ Main function to run the program."""
+    """Main function to run the program."""
 
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
@@ -64,6 +66,7 @@ def main():
         """ Run the scheduled tasks."""
         schedule.run_pending()
         time.sleep(1)
+
 
 if __name__ == "__main__":
     main()

@@ -8,7 +8,6 @@ import requests as requests
 
 
 class NetworkOperations:
-
     @staticmethod
     def check_internet_connection():
         """Detect an internet connection."""
@@ -25,34 +24,35 @@ class NetworkOperations:
         finally:
             return connection
 
-    def get_signal_strength(self='wlan0'):
+    def get_signal_strength(self="wlan0"):
         """Get the signal strength of the wireless network."""
         try:
-            output = subprocess.check_output(['/usr/sbin/iwconfig', self], stderr=subprocess.STDOUT,
-                                             universal_newlines=True)
-            lines = output.split('\n')
+            output = subprocess.check_output(
+                ["/usr/sbin/iwconfig", self], stderr=subprocess.STDOUT, universal_newlines=True
+            )
+            lines = output.split("\n")
 
             for line in lines:
-                if 'Signal level' in line:
-                    index_start = line.index('Signal level=') + len('Signal level=')
-                    index_end = line.index(' dBm')
+                if "Signal level" in line:
+                    index_start = line.index("Signal level=") + len("Signal level=")
+                    index_end = line.index(" dBm")
                     signal_level = line[index_start:index_end]
                     return int(signal_level)
 
             # If signal strength information is not found
             return None
         except subprocess.CalledProcessError as e:
-            print(f'Error running iwconfig: {e.output}')
+            print(f"Error running iwconfig: {e.output}")
             return None
 
     @staticmethod
     def get_ip_address():
-        """ Get the IP address of the wireless network."""
-        return psutil.net_if_addrs()['wlan0'][0].address
+        """Get the IP address of the wireless network."""
+        return psutil.net_if_addrs()["wlan0"][0].address
 
     @staticmethod
     def get_current_traffic():
-        """ Get the current network traffic."""
+        """Get the current network traffic."""
 
         interval = 1
         # Getting network traffic information
