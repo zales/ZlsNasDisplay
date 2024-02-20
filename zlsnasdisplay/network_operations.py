@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding:utf-8 -*-
-
+import logging
 import subprocess
 import psutil
 import time
@@ -16,10 +16,10 @@ class NetworkOperations:
         try:
             r = requests.get("https://google.com")
             r.raise_for_status()
-            print("Internet connection detected.")
+            logging.debug("Internet connection detected.")
             connection = True
         except:
-            print("Internet connection not detected.")
+            logging.debug("Internet connection not detected.")
             connection = False
         finally:
             return connection
@@ -42,7 +42,7 @@ class NetworkOperations:
             # If signal strength information is not found
             return None
         except subprocess.CalledProcessError as e:
-            print(f"Error running iwconfig: {e.output}")
+            logging.debug(f"Error running iwconfig: {e.output}")
             return None
 
     @staticmethod
@@ -82,10 +82,10 @@ class NetworkOperations:
         try:
             r = requests.get("https://google.com")
             r.raise_for_status()
-            print("Internet connection detected.")
+            logging.debug("Internet connection detected.")
             connection = True
         except:
-            print("Internet connection not detected.")
+            logging.debug("Internet connection not detected.")
             connection = False
         finally:
             return connection
