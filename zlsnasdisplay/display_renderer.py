@@ -41,7 +41,7 @@ class DisplayRenderer:
     def update_display_and_save_image(self):
         """ Update the display and save the image"""
         self.display_controller.update_display(self.image)
-        self.image.save("/mnt/web-display/tmp/display-dev.png", "PNG")
+        self.image.save("/mnt/web-display/tmp/display.png", "PNG")
 
     def render_cpu_load(self):
         """ Render CPU load"""

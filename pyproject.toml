@@ -8,6 +8,12 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
+pillow = "^10.2.0"
+spidev = "^3.6"
+gpiozero = "^2.0.1"
+schedule = "^1.2.1"
+psutil = "^5.9.8"
+requests = "^2.31.0"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "1.8.0"
