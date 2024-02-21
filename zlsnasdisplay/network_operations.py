@@ -13,13 +13,15 @@ class NetworkOperations:
         """Detect an internet connection."""
 
         connection = None
+        # noinspection PyBroadException
         try:
             r = requests.get("https://google.com")
             r.raise_for_status()
             logging.debug("Internet connection detected.")
             connection = True
-        except:
+        except Exception as ex:
             logging.debug("Internet connection not detected.")
+            logging.debug(f"{ex}")
             connection = False
         finally:
             return connection
@@ -74,18 +76,3 @@ class NetworkOperations:
 
         return download_speed, upload_speed
 
-    @staticmethod
-    def internet_connection():
-        """Detect an internet connection."""
-
-        connection = None
-        try:
-            r = requests.get("https://google.com")
-            r.raise_for_status()
-            logging.debug("Internet connection detected.")
-            connection = True
-        except:
-            logging.debug("Internet connection not detected.")
-            connection = False
-        finally:
-            return connection

@@ -953,14 +953,14 @@ class EPD:
         return buf
 
     def display(self, image):
-        if image == None:
+        if image is None:
             return
         self.send_command(0x24)  # WRITE_RAM
         self.send_data2(image)
         self.TurnOnDisplay()
 
     def display_Base(self, image):
-        if image == None:
+        if image is None:
             return
 
         self.send_command(0x24)  # WRITE_RAM
@@ -1039,7 +1039,7 @@ class EPD:
         self.TurnOnDisplay()
 
     def display_Partial(self, image):
-        if image == None:
+        if image is None:
             return
 
         epdconfig.digital_write(self.reset_pin, 0)
