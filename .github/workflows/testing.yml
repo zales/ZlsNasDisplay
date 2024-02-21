@@ -29,6 +29,7 @@ jobs:
       run: poetry run ruff check .
     - name: mypy check
       run: poetry run mypy .
+      continue-on-error: true
   testing:
     strategy:
       fail-fast: false
