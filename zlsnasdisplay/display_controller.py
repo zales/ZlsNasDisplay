@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-from waveshare_epd import epd2in9_V2
+from zlsnasdisplay.waveshare_epd import epd2in9_V2
 
 
 class DisplayController:

@@ -2,10 +2,10 @@
 
 import os
 
-from display_controller import DisplayController
-from network_operations import NetworkOperations
+from zlsnasdisplay.display_controller import DisplayController
+from zlsnasdisplay.network_operations import NetworkOperations
 from PIL import Image, ImageDraw, ImageFont
-from system_operations import SystemOperations
+from zlsnasdisplay.system_operations import SystemOperations
 
 
 class DisplayRenderer:

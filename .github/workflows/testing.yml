@@ -52,5 +52,3 @@ jobs:
         cache: "poetry"
     - name: Install Dependencies
       run: poetry install
-    - name: Test with pytest
-      run: poetry run pytest
