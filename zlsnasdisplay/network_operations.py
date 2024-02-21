@@ -1,9 +1,9 @@
 #! /usr/bin/env python3
-# -*- coding:utf-8 -*-
 import logging
 import subprocess
-import psutil
 import time
+
+import psutil
 import requests as requests
 
 

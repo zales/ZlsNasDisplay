@@ -27,11 +27,11 @@
 # THE SOFTWARE.
 #
 
-import os
 import logging
+import os
+import subprocess
 import sys
 import time
-import subprocess
 
 logger = logging.getLogger(__name__)
 
@@ -45,8 +45,8 @@ class RaspberryPi:
     PWR_PIN = 18
 
     def __init__(self):
-        import spidev
         import gpiozero
+        import spidev
 
         self.SPI = spidev.SpiDev()
         self.GPIO_RST_PIN = gpiozero.LED(self.RST_PIN)
@@ -205,8 +205,8 @@ class SunriseX3:
     Flag = 0
 
     def __init__(self):
-        import spidev
         import Hobot.GPIO
+        import spidev
 
         self.GPIO = Hobot.GPIO
         self.SPI = spidev.SpiDev()

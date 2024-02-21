@@ -1,10 +1,10 @@
 #! /usr/bin/env python3
-# -*- coding:utf-8 -*-
 
-import psutil
 import datetime
-from gpiozero import CPUTemperature
+
 import apt
+import psutil
+from gpiozero import CPUTemperature
 
 
 class SystemOperations:

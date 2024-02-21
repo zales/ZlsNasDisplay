@@ -1,11 +1,11 @@
 #! /usr/bin/env python3
-# -*- coding:utf-8 -*-
 
-from PIL import Image, ImageDraw, ImageFont
-from display_controller import DisplayController
-from system_operations import SystemOperations
-from network_operations import NetworkOperations
 import os
+
+from display_controller import DisplayController
+from network_operations import NetworkOperations
+from PIL import Image, ImageDraw, ImageFont
+from system_operations import SystemOperations
 
 
 class DisplayRenderer:
@@ -85,7 +85,7 @@ class DisplayRenderer:
 
         self.draw.text((216, 68), "apt", font=self.font14, fill=0)
         self.draw.line([(240, 76), (296, 76)], fill=0, width=0)
-        self.draw.text((125, 110), f"\ue63e", font=self.nfont14, fill=0)  # Unicode icon for wifi
+        self.draw.text((125, 110), "\ue63e", font=self.nfont14, fill=0)  # Unicode icon for wifi
         self.draw.text(
             (140, 110), f"{NetworkOperations.get_signal_strength()} dBm", font=self.font14, fill=0
         )  # CPU temperature
@@ -144,7 +144,7 @@ class DisplayRenderer:
         """Render IP address"""
         self.draw.rectangle((0, 111, 109, 128), fill=255)
 
-        self.draw.text((5, 110), f"\ue80d", font=self.nfont14, fill=0)  # Unicode icon for network
+        self.draw.text((5, 110), "\ue80d", font=self.nfont14, fill=0)  # Unicode icon for network
         self.draw.text(
             (20, 110), f"{NetworkOperations.get_ip_address()}", font=self.font14, fill=0
         )  # Ip address
@@ -157,7 +157,7 @@ class DisplayRenderer:
 
         uptime = SystemOperations.get_uptime()
 
-        self.draw.text((205, 110), f"\ue923", font=self.nfont14, fill=0)  # Unicode icon for uptime
+        self.draw.text((205, 110), "\ue923", font=self.nfont14, fill=0)  # Unicode icon for uptime
         self.draw.text(
             (220, 110), f"{uptime[0]}d {uptime[1]}h {uptime[2]}m", font=self.font14, fill=0
         )  # uptime

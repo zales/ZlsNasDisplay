@@ -1,5 +1,4 @@
 #! /usr/bin/env python3
-# -*- coding:utf-8 -*-
 
 from waveshare_epd import epd2in9_V2
 

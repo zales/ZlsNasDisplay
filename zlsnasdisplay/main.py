@@ -1,13 +1,13 @@
 #! /usr/bin/env python3
-# -*- coding:utf-8 -*-
 
-from display_renderer import DisplayRenderer
-import schedule
-import time
 import logging
-import sentry_sdk
 import signal
 import sys
+import time
+
+import schedule
+import sentry_sdk
+from display_renderer import DisplayRenderer
 
 # Configure logging level
 logging.basicConfig(level=logging.DEBUG)
