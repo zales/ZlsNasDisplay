@@ -75,4 +75,3 @@ class NetworkOperations:
         upload_speed = upload_bytes / interval / (1024 * 1024)
 
         return download_speed, upload_speed
-
