@@ -30,7 +30,7 @@ class SystemOperations:
         # Initialize package manager cache
         cache = apt.Cache()
         # Update package information
-        # cache.update()
+        cache.update()
         # Update package list
         cache.open(None)
         # Number of packages that need to be updated

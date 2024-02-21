@@ -16,6 +16,8 @@ psutil = "^5.9.8"
 requests = "^2.31.0"
 sentry-sdk = "^1.40.5"
 pigpio = "^1.78"
+rpi-gpio = "^0.7.1"
+rpi-lgpio = "^0.4"
 lgpio = "^0.0.0.2"
 
 [tool.poetry.group.dev.dependencies]
