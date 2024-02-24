@@ -10,12 +10,13 @@ import schedule
 
 from zlsnasdisplay.display_renderer import DisplayRenderer
 
-# Configure logging level
-logging.basicConfig(level=logging.DEBUG)
-
+# GET ENVIRONMENT VARIABLES
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 SENTRY_DSN = os.getenv("SENTRY_DSN", False)
 DISPLAY_IMAGE_PATH = os.getenv("DISPLAY_IMAGE_PATH", False)
 
+# Configure logging level
+logging.basicConfig(level=LOG_LEVEL)
 
 if SENTRY_DSN:
     import sentry_sdk
