@@ -73,9 +73,15 @@ class DisplayRenderer:
         self.draw.text((216, 68), "apt", font=self.font14, fill=0)
         self.draw.line([(240, 76), (296, 76)], fill=0, width=0)
         self.draw.text((220, 80), "\uf5f4", font=self.nfont24, fill=0)  # Unicode icon for package
-        self.draw.text(
-            (250, 80), f"{SystemOperations().check_updates()}", font=self.font24, fill=0
-        )  # Swap memory percentage
+        number_of_updates = SystemOperations().check_updates()
+        if number_of_updates is 0:
+            self.draw.text(
+                (250, 80), f"\ue8e8", font=self.nfont24, fill=0
+            )
+        else:
+            self.draw.text(
+                (250, 80), f"{number_of_updates}", font=self.font24, fill=0
+            )  # Number of available updates
 
         self.update_display_and_save_image()
 
@@ -169,7 +175,7 @@ class DisplayRenderer:
         self.draw.rectangle((216, 0, 296, 68), fill=255)
 
         network = NetworkOperations.get_current_traffic()
-        self.draw.text((216, 0), "net (Mb/s)", font=self.font14, fill=0)
+        self.draw.text((216, 0), "net (MB/s)", font=self.font14, fill=0)
         self.draw.line([(282, 10), (296, 10)], fill=0, width=0)
         self.draw.text((220, 12), "\uf090", font=self.nfont24, fill=0)  # Unicode icon download
         self.draw.text((245, 12), f"{round(network[0], 2)}", font=self.font24, fill=0)  # download
