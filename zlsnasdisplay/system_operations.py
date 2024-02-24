@@ -25,12 +25,13 @@ class SystemOperations:
         return psutil.sensors_fans()["pwmfan"][0].current
 
     @staticmethod
-    def check_updates():
+    def check_updates(is_root):
         """Check for available updates and return the number of packages that need to be updated."""
         # Initialize package manager cache
         cache = apt.Cache()
-        # Update package information
-        cache.update()
+        # Update package informationa
+        if is_root:
+            cache.update()
         # Update package list
         cache.open(None)
         # Number of packages that need to be updated

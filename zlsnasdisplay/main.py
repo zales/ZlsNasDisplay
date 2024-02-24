@@ -4,19 +4,32 @@ import logging
 import signal
 import sys
 import time
+import os
 
 import schedule
-import sentry_sdk
 
 from zlsnasdisplay.display_renderer import DisplayRenderer
 
 # Configure logging level
 logging.basicConfig(level=logging.DEBUG)
 
-# Initialize Sentry for error tracking
-sentry_sdk.init("https://c23614af051048d6866787f8338d15c0@glitchtip.zales.dev/1")
+SENTRY_DSN = os.getenv("SENTRY_DSN", False)
+DISPLAY_IMAGE_PATH = os.getenv("DISPLAY_IMAGE_PATH", False)
 
-display_renderer = DisplayRenderer()
+
+if SENTRY_DSN:
+    import sentry_sdk
+
+    # Initialize Sentry for error tracking
+    sentry_sdk.init(SENTRY_DSN)
+
+# Detect sudo
+IS_ROOT = os.getuid() == 0
+
+if not IS_ROOT:
+    logging.warning("The script does not run as root. Cannot perform apt update!")
+
+display_renderer = DisplayRenderer(DISPLAY_IMAGE_PATH, IS_ROOT)
 
 
 # Define signal_handler function to catch SIGINT (Ctrl+C)

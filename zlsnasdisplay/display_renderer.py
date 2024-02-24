@@ -10,11 +10,14 @@ from zlsnasdisplay.system_operations import SystemOperations
 
 
 class DisplayRenderer:
-    def __init__(self):
+    def __init__(self, DISPLAY_IMAGE_PATH, IS_ROOT):
         """Initialize the display renderer"""
         self.display_controller = DisplayController()
 
         self.display_controller.clear_display()
+
+        self.display_image_path = DISPLAY_IMAGE_PATH
+        self.is_root = IS_ROOT
 
         # Define directories for fonts and the e-paper display library
         fontdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "fonts")
@@ -44,7 +47,8 @@ class DisplayRenderer:
     def update_display_and_save_image(self):
         """Update the display and save the image"""
         self.display_controller.update_display(self.image)
-        self.image.save("/mnt/web-display/tmp/display.png", "PNG")
+        if self.display_image_path:
+            self.image.save(self.display_image_path, "PNG")
 
     def render_cpu_load(self):
         """Render CPU load"""
@@ -74,7 +78,7 @@ class DisplayRenderer:
         self.draw.text((216, 68), "apt", font=self.font14, fill=0)
         self.draw.line([(240, 76), (296, 76)], fill=0, width=0)
         self.draw.text((220, 80), "\uf5f4", font=self.nfont24, fill=0)  # Unicode icon for package
-        number_of_updates = SystemOperations().check_updates()
+        number_of_updates = SystemOperations().check_updates(self.is_root)
         if number_of_updates == 0:
             self.draw.text((250, 80), "\ue8e8", font=self.nfont24, fill=0)
         else:
