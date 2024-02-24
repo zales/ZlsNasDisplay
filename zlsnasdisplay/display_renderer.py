@@ -2,9 +2,10 @@
 
 import os
 
+from PIL import Image, ImageDraw, ImageFont
+
 from zlsnasdisplay.display_controller import DisplayController
 from zlsnasdisplay.network_operations import NetworkOperations
-from PIL import Image, ImageDraw, ImageFont
 from zlsnasdisplay.system_operations import SystemOperations
 
 
@@ -74,10 +75,8 @@ class DisplayRenderer:
         self.draw.line([(240, 76), (296, 76)], fill=0, width=0)
         self.draw.text((220, 80), "\uf5f4", font=self.nfont24, fill=0)  # Unicode icon for package
         number_of_updates = SystemOperations().check_updates()
-        if number_of_updates is 0:
-            self.draw.text(
-                (250, 80), f"\ue8e8", font=self.nfont24, fill=0
-            )
+        if number_of_updates == 0:
+            self.draw.text((250, 80), "\ue8e8", font=self.nfont24, fill=0)
         else:
             self.draw.text(
                 (250, 80), f"{number_of_updates}", font=self.font24, fill=0

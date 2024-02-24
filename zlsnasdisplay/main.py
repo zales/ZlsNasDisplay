@@ -7,6 +7,7 @@ import time
 
 import schedule
 import sentry_sdk
+
 from zlsnasdisplay.display_renderer import DisplayRenderer
 
 # Configure logging level
