@@ -74,6 +74,8 @@ def main():
     schedule.every(1).minutes.do(display_renderer.render_uptime)
     # Render current traffic every 10 seconds
     schedule.every(10).seconds.do(display_renderer.render_current_traffic)
+    # Render current traffic every 30 seconds
+    schedule.every(30).seconds.do(display_renderer.check_net)
 
     schedule.run_all()
 

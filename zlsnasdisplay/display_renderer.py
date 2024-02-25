@@ -10,14 +10,14 @@ from zlsnasdisplay.system_operations import SystemOperations
 
 
 class DisplayRenderer:
-    def __init__(self, DISPLAY_IMAGE_PATH, IS_ROOT):
+    def __init__(self, display_image_path, is_root):
         """Initialize the display renderer"""
         self.display_controller = DisplayController()
 
         self.display_controller.clear_display()
 
-        self.display_image_path = DISPLAY_IMAGE_PATH
-        self.is_root = IS_ROOT
+        self.display_image_path = display_image_path
+        self.is_root = is_root
 
         # Define directories for fonts and the e-paper display library
         fontdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "fonts")
@@ -57,7 +57,7 @@ class DisplayRenderer:
         self.draw.line(((26, 10), (97, 10)), fill=0, width=0)
 
         self.draw.text((1, 0), "cpu", font=self.font14, fill=0)
-        # Draw CPU usage, memory usage, swap memory usage, and CPU temperature
+        # Draw CPU usage
         self.draw.text((10, 12), "\ue30d", font=self.nfont24, fill=0)  # Unicode icon for CPU
         self.draw.text(
             (40, 12), f"{SystemOperations().get_cpu_load()}%", font=self.font24, fill=0
@@ -73,18 +73,33 @@ class DisplayRenderer:
 
     def get_updates(self):
         """Get updates for the display"""
-        self.draw.rectangle((204, 68, 296, 100), fill=255)
+        self.draw.rectangle((204, 68, 248, 100), fill=255)
 
         self.draw.text((204, 67), "apt", font=self.font14, fill=0)
-        self.draw.line([(226, 76), (296, 76)], fill=0, width=0)
-        self.draw.text((208, 80), "\uf5f4", font=self.nfont24, fill=0)  # Unicode icon for package
+        self.draw.line([(226, 76), (248, 76)], fill=0, width=0)
         number_of_updates = SystemOperations().check_updates(self.is_root)
         if number_of_updates == 0:
-            self.draw.text((238, 80), "\ue8e8", font=self.nfont24, fill=0)
+            self.draw.text((214, 80), "\ue8e8", font=self.nfont24, fill=0)
         else:
             self.draw.text(
-                (238, 80), f"{number_of_updates}", font=self.font24, fill=0
+                (214, 80), f"{number_of_updates}", font=self.font24, fill=0
             )  # Number of available updates
+
+        self.update_display_and_save_image()
+
+    def check_net(self):
+        """Check network status"""
+        self.draw.rectangle((249, 68, 296, 100), fill=255)
+
+        self.draw.text((250, 67), "net", font=self.font14, fill=0)
+        self.draw.line([(249, 76), (249, 110)], fill=0, width=0)
+        self.draw.line([(272, 76), (297, 76)], fill=0, width=0)
+        if NetworkOperations.check_internet_connection():
+            self.draw.text((260, 80), "\ue2bf", font=self.nfont24, fill=0)
+        else:
+            self.draw.text(
+                (260, 80), "\uf034", font=self.font24, fill=0
+            )
 
         self.update_display_and_save_image()
 
@@ -92,7 +107,6 @@ class DisplayRenderer:
         """Render signal strength"""
         self.draw.rectangle((125, 111, 204, 128), fill=255)
 
-        self.draw.line([(240, 76), (296, 76)], fill=0, width=0)
         self.draw.text((125, 110), "\ue63e", font=self.nfont14, fill=0)  # Unicode icon for wifi
         self.draw.text(
             (140, 110), f"{NetworkOperations.get_signal_strength()} dBm", font=self.font14, fill=0
