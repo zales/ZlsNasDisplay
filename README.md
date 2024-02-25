@@ -40,6 +40,16 @@ Update Frequency: Updated every 10 seconds.
 
 `sudo pip3 install zlsnasdisplay`
 
+## Hardware
+Raspberry Pi (5 tested)
+
+[Waveshare 2.9" e-ink display](https://www.waveshare.com/product/2.9inch-e-paper-module.htm)
+
+### Wiring
+
+All necessary information about the wiring and operation is available on the [waveshare wiki](https://www.waveshare.com/wiki/2.9inch_e-Paper_Module_Manual#Working_With_Raspberry_Pi)
+
+
 ## Development
 
 ### Dependencies
