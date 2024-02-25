@@ -1,7 +1,6 @@
 # ZlsNasDisplay
 
-![display (8)](https://github.com/zales/ZlsNasDisplay/assets/832783/bc0ac8a3-ee89-40ad-a3ea-1b50db9b47d2) ![Motiv](https://github.com/zales/ZlsNasDisplay/assets/832783/a1a764be-8ecd-4063-a75c-506135400a1f)
-
+![display (8)](https://github.com/zales/ZlsNasDisplay/assets/832783/bc0ac8a3-ee89-40ad-a3ea-1b50db9b47d2) 
 
 
 The ZlsNasDisplay application renders various system statistics onto the e-ink display, providing users with real-time insights into the Raspberry Pi-based NAS device's performance and connectivity. Here's a breakdown of the displayed information and their respective update frequencies:
@@ -118,4 +117,6 @@ To install the ZlsNasDisplay project using Poetry, you can follow these steps:
     bashCopy code
     
     `poetry run python3 zlsnasdisplay`
+
+![Motiv](https://github.com/zales/ZlsNasDisplay/assets/832783/a1a764be-8ecd-4063-a75c-506135400a1f)
 
