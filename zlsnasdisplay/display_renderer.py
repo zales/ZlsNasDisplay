@@ -97,9 +97,7 @@ class DisplayRenderer:
         if NetworkOperations.check_internet_connection():
             self.draw.text((260, 80), "\ue2bf", font=self.nfont24, fill=0)
         else:
-            self.draw.text(
-                (260, 80), "\uf034", font=self.font24, fill=0
-            )
+            self.draw.text((260, 80), "\uf034", font=self.font24, fill=0)
 
         self.update_display_and_save_image()
 
