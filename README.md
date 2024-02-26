@@ -6,34 +6,34 @@
 The ZlsNasDisplay application renders various system statistics onto the e-ink display, providing users with real-time insights into the Raspberry Pi-based NAS device's performance and connectivity. Here's a breakdown of the displayed information and their respective update frequencies:
 
 * **CPU Load and Temperature**  
-Displayed Information: The current CPU load percentage and temperature.
+Displayed Information: The current CPU load percentage and temperature.  
 Update Frequency: Updated every 30 seconds.
 * **Available System Updates**  
-Displayed Information: The number of available system updates.
+Displayed Information: The number of available system updates.  
 Update Frequency: Checked every 3 hours.
 * **Network Status**
-Displayed Information: Indicator of internet connectivity status.
+Displayed Information: Indicator of internet connectivity status.  
 Update Frequency: Checked every 30 seconds.
 * **Signal Strength**  
-Displayed Information: The signal strength of the Wi-Fi connection in dBm.
+Displayed Information: The signal strength of the Wi-Fi connection in dBm.  
 Update Frequency: Updated every minute.
 * **Memory Usage**  
-Displayed Information: The current memory usage percentage.
+Displayed Information: The current memory usage percentage.  
 Update Frequency: Updated every minute.
 * **NVMe Disk Usage and Temperature**  
-Displayed Information: The NVMe disk usage percentage and temperature.
+Displayed Information: The NVMe disk usage percentage and temperature.  
 Update Frequency: Updated every minute.
 * **Fan Speed**  
-Displayed Information: The current fan speed in RPM (Revolutions Per Minute).
+Displayed Information: The current fan speed in RPM (Revolutions Per Minute).  
 Update Frequency: Updated every 10 seconds.
 * **IP Address**  
-Displayed Information: The current IP address of the Raspberry Pi.
+Displayed Information: The current IP address of the Raspberry Pi.  
 Update Frequency: Updated every hour.
 * **System Uptime**  
-Displayed Information: The system uptime in days, hours, and minutes.
+Displayed Information: The system uptime in days, hours, and minutes.  
 Update Frequency: Updated every minute.
 * **Current Network Traffic**  
-Displayed Information: The current download and upload speeds in MB/s.
+Displayed Information: The current download and upload speeds in MB/s.  
 Update Frequency: Updated every 10 seconds.
 
 
