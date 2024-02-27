@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "zlsnasdisplay"
-version = "0.1.2"
+version = "0.1.4"
 description = "Eink display manager"
 authors = ["Ondrej Zalesky <o.zalesky@gmail.com>"]
 license = "MIT"
