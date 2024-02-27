@@ -109,9 +109,7 @@ class DisplayRenderer:
 
         if signal is not None:
             self.draw.text((125, 110), "\ue63e", font=self.nfont14, fill=0)  # Unicode icon for wifi
-            self.draw.text(
-                (140, 110), f"{signal} dBm", font=self.font14, fill=0
-            )  # CPU temperature
+            self.draw.text((140, 110), f"{signal} dBm", font=self.font14, fill=0)  # CPU temperature
         else:
             self.draw.text((125, 110), "\ue1da", font=self.nfont14, fill=0)  # Unicode icon for wifi
 
