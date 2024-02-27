@@ -89,7 +89,7 @@ class DisplayRenderer:
 
     def check_net(self):
         """Check network status"""
-        self.draw.rectangle((249, 68, 296, 100), fill=255)
+        self.draw.rectangle((249, 79, 296, 109), fill=255)
 
         self.draw.text((250, 67), "net", font=self.font14, fill=0)
         self.draw.line([(249, 76), (249, 110)], fill=0, width=0)
@@ -97,7 +97,7 @@ class DisplayRenderer:
         if NetworkOperations.check_internet_connection():
             self.draw.text((260, 80), "\ue2bf", font=self.nfont24, fill=0)
         else:
-            self.draw.text((260, 80), "\uf034", font=self.font24, fill=0)
+            self.draw.text((260, 80), "\uf1ca", font=self.nfont24, fill=0)
 
         self.update_display_and_save_image()
 
@@ -105,10 +105,13 @@ class DisplayRenderer:
         """Render signal strength"""
         self.draw.rectangle((125, 111, 204, 128), fill=255)
 
-        self.draw.text((125, 110), "\ue63e", font=self.nfont14, fill=0)  # Unicode icon for wifi
-        self.draw.text(
-            (140, 110), f"{NetworkOperations.get_signal_strength()} dBm", font=self.font14, fill=0
-        )  # CPU temperature
+        signal = NetworkOperations.get_signal_strength()
+
+        if signal is not None:
+            self.draw.text((125, 110), "\ue63e", font=self.nfont14, fill=0)  # Unicode icon for wifi
+            self.draw.text((140, 110), f"{signal} dBm", font=self.font14, fill=0)  # CPU temperature
+        else:
+            self.draw.text((125, 110), "\ue1da", font=self.nfont14, fill=0)  # Unicode icon for wifi
 
         self.update_display_and_save_image()
 
@@ -142,7 +145,7 @@ class DisplayRenderer:
             (108, 42), "\ue1ff", font=self.nfont24, fill=0
         )  # Unicode icon for temperature
         self.draw.text(
-            (138, 42), f"{SystemOperations.get_nvme_temp()} °C", font=self.font24, fill=0
+            (138, 42), f"{SystemOperations.get_nvme_temp()}°C", font=self.font24, fill=0
         )  # Nvme temperature
 
         self.update_display_and_save_image()
