@@ -6,6 +6,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 from zlsnasdisplay.display_controller import DisplayController
 from zlsnasdisplay.network_operations import NetworkOperations
+from zlsnasdisplay.network_operations import TrafficMonitor
 from zlsnasdisplay.system_operations import SystemOperations
 
 
@@ -25,6 +26,7 @@ class DisplayRenderer:
         # Load fonts
         self.font34 = ImageFont.truetype(os.path.join(fontdir, "Ubuntu-Regular.ttf"), 34)
         self.font24 = ImageFont.truetype(os.path.join(fontdir, "Ubuntu-Regular.ttf"), 24)
+        self.font20 = ImageFont.truetype(os.path.join(fontdir, "Ubuntu-Regular.ttf"), 20)
         self.font14 = ImageFont.truetype(os.path.join(fontdir, "Ubuntu-Light.ttf"), 14)
 
         self.nfont50 = ImageFont.truetype(os.path.join(fontdir, "MaterialSymbolsRounded.ttf"), 50)
@@ -191,22 +193,27 @@ class DisplayRenderer:
         """Render current traffic"""
         self.draw.rectangle((204, 0, 296, 68), fill=255)
 
-        network = NetworkOperations.get_current_traffic()
-        self.draw.text((204, 0), "net (MB/s)", font=self.font14, fill=0)
-        self.draw.line([(270, 10), (296, 10)], fill=0, width=0)
-        self.draw.text((208, 12), "\uf090", font=self.nfont24, fill=0)  # Unicode icon download
-        self.draw.text((233, 12), f"{round(network[0], 2)}", font=self.font24, fill=0)  # download
-        self.draw.text((208, 42), "\uf09b", font=self.nfont24, fill=0)  # Unicode icon for upload
-        self.draw.text((233, 42), f"{round(network[1], 2)}", font=self.font24, fill=0)  # upload
+        network = TrafficMonitor().get_current_traffic()
+        self.draw.text((204, 0), f"down", font=self.font14, fill=0)
+        self.draw.line([(242, 10), (261, 10)], fill=0, width=0)
+        self.draw.text((263, 0), f"{network[1]}/s", font=self.font14, fill=0)
+        self.draw.text((208, 10), "\uf090", font=self.nfont24, fill=0)  # Unicode icon download
+        self.draw.text((233, 14), f"{round(network[0], 2)}", font=self.font20, fill=0)  # download
+
+        self.draw.text((204, 33), f"up", font=self.font14, fill=0)
+        self.draw.line([(222, 43), (261, 43)], fill=0, width=0)
+        self.draw.text((263, 33), f"{network[3]}/s", font=self.font14, fill=0)
+        self.draw.text((208, 44), "\uf09b", font=self.nfont24, fill=0)  # Unicode icon for upload
+        self.draw.text((233, 48), f"{round(network[2], 2)}", font=self.font20, fill=0)  # upload
 
         self.update_display_and_save_image()
 
     def go_to_sleep(self):
         """Render the display"""
         self.draw.rectangle((0, 0, 296, 128), fill=0)
-        self.draw.line([(140, 15), (140, 110)], fill=255, width=0)
+        self.draw.rectangle((136, 15, 139, 110), fill=255, width=0)
         self.draw.text((155, 36), "ZlsNas", font=self.font34, fill=255)
-        self.draw.text((70, 36), "\ue80d", font=self.nfont50, fill=255)
+        self.draw.text((65, 36), "\ue80d", font=self.nfont50, fill=255)
         self.draw.text((160, 71), "Sleeping...", font=self.font14, fill=255)
 
         self.update_display_and_save_image()

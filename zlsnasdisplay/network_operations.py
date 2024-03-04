@@ -52,8 +52,9 @@ class NetworkOperations:
         """Get the IP address of the wireless network."""
         return psutil.net_if_addrs()["wlan0"][0].address
 
-    @staticmethod
-    def get_current_traffic():
+
+class TrafficMonitor:
+    def get_current_traffic(self):
         """Get the current network traffic."""
 
         interval = 1
@@ -70,8 +71,19 @@ class NetworkOperations:
         download_bytes = net_io_end.bytes_recv - net_io_start.bytes_recv
         upload_bytes = net_io_end.bytes_sent - net_io_start.bytes_sent
 
-        # Converting bytes to megabytes and calculating the speed in MB/s
-        download_speed = download_bytes / interval / (1024 * 1024)
-        upload_speed = upload_bytes / interval / (1024 * 1024)
+        # Calculate download speed and choose appropriate unit
+        download_speed, download_unit = self._choose_unit(download_bytes / interval)
 
-        return download_speed, upload_speed
+        # Calculate upload speed and choose appropriate unit
+        upload_speed, upload_unit = self._choose_unit(upload_bytes / interval)
+
+        return download_speed, download_unit, upload_speed, upload_unit
+
+    @staticmethod
+    def _choose_unit(speed):
+        """Choose appropriate unit for speed."""
+        for unit in ["B", "kB", "MB"]:
+            if speed < 1024:
+                return speed, unit
+            speed /= 1024
+        return speed, "GB"  # If speed exceeds GB/s
