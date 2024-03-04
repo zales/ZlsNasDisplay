@@ -71,9 +71,6 @@ class TrafficMonitor:
         download_bytes = net_io_end.bytes_recv - net_io_start.bytes_recv
         upload_bytes = net_io_end.bytes_sent - net_io_start.bytes_sent
 
-        # Define units for bytes conversion
-        units = ["B", "kB", "MB"]
-
         # Calculate download speed and choose appropriate unit
         download_speed, download_unit = self._choose_unit(download_bytes / interval)
 
