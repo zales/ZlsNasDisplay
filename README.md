@@ -1,6 +1,7 @@
 # ZlsNasDisplay
 
-![display (8)](https://github.com/zales/ZlsNasDisplay/assets/832783/bc0ac8a3-ee89-40ad-a3ea-1b50db9b47d2) 
+![display (10)](https://github.com/zales/ZlsNasDisplay/assets/832783/6e7828bc-3317-48c0-a1b5-804f8b1b86d2)
+![display_sleep](https://github.com/zales/ZlsNasDisplay/assets/832783/63055923-21f6-4852-9ad6-2ac78c4181e7)
 
 
 The ZlsNasDisplay application renders various system statistics onto the e-ink display, providing users with real-time insights into the Raspberry Pi-based NAS device's performance and connectivity. Here's a breakdown of the displayed information and their respective update frequencies:
