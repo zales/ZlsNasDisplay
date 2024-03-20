@@ -75,7 +75,7 @@ class DisplayRenderer:
 
     def get_updates(self):
         """Get updates for the display"""
-        self.draw.rectangle((204, 68, 248, 100), fill=255)
+        self.draw.rectangle((204, 68, 248, 109), fill=255)
 
         self.draw.text((204, 67), "apt", font=self.font14, fill=0)
         self.draw.line([(226, 76), (248, 76)], fill=0, width=0)
