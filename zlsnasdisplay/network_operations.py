@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 import logging
+import socket
 import subprocess
 import time
 
@@ -50,7 +51,9 @@ class NetworkOperations:
     @staticmethod
     def get_ip_address():
         """Get the IP address of the wireless network."""
-        return psutil.net_if_addrs()["wlan0"][0].address
+        hostname = socket.gethostname()
+        ip_address = socket.gethostbyname(hostname)
+        return ip_address
 
 
 class TrafficMonitor:
