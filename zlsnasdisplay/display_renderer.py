@@ -5,8 +5,7 @@ import os
 from PIL import Image, ImageDraw, ImageFont
 
 from zlsnasdisplay.display_controller import DisplayController
-from zlsnasdisplay.network_operations import NetworkOperations
-from zlsnasdisplay.network_operations import TrafficMonitor
+from zlsnasdisplay.network_operations import NetworkOperations, TrafficMonitor
 from zlsnasdisplay.system_operations import SystemOperations
 
 
@@ -194,13 +193,13 @@ class DisplayRenderer:
         self.draw.rectangle((204, 0, 296, 68), fill=255)
 
         network = TrafficMonitor().get_current_traffic()
-        self.draw.text((204, 0), f"down", font=self.font14, fill=0)
+        self.draw.text((204, 0), "down", font=self.font14, fill=0)
         self.draw.line([(242, 10), (261, 10)], fill=0, width=0)
         self.draw.text((263, 0), f"{network[1]}/s", font=self.font14, fill=0)
         self.draw.text((208, 10), "\uf090", font=self.nfont24, fill=0)  # Unicode icon download
         self.draw.text((233, 14), f"{round(network[0], 2)}", font=self.font20, fill=0)  # download
 
-        self.draw.text((204, 33), f"up", font=self.font14, fill=0)
+        self.draw.text((204, 33), "up", font=self.font14, fill=0)
         self.draw.line([(222, 43), (261, 43)], fill=0, width=0)
         self.draw.text((263, 33), f"{network[3]}/s", font=self.font14, fill=0)
         self.draw.text((208, 44), "\uf09b", font=self.nfont24, fill=0)  # Unicode icon for upload

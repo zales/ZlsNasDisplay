@@ -1,10 +1,10 @@
 #! /usr/bin/env python3
 
 import logging
+import os
 import signal
 import sys
 import time
-import os
 
 import schedule
 
