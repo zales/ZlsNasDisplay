@@ -17,7 +17,7 @@ class SystemOperations:
     @staticmethod
     def get_cpu_load():
         """Get the CPU load in percentage"""
-        return int(int(psutil.cpu_percent()))
+        return int(psutil.cpu_percent())
 
     @staticmethod
     def get_fan_speed():
