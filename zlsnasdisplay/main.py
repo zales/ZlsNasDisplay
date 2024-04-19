@@ -56,26 +56,27 @@ def main():
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGHUP, signal_handler)
 
+
+    # Render current traffic every 10 seconds
+    schedule.every(10).seconds.do(display_renderer.render_current_traffic)
+    # Render fan speed every 10 seconds
+    schedule.every(10).seconds.do(display_renderer.render_fan_speed)
     # Render CPU load every 30 seconds
     schedule.every(30).seconds.do(display_renderer.render_cpu_load)
-    # Get updates every 3 hours
-    schedule.every(3).hours.do(display_renderer.get_updates)
+    # Render current traffic every 30 seconds
+    schedule.every(30).seconds.do(display_renderer.check_net)
     # Render signal strength every minute
     schedule.every(1).minutes.do(display_renderer.render_signal_strength)
     # Render memory usage every minute
     schedule.every(1).minutes.do(display_renderer.render_mem)
     # Render NVMe stats every minute
     schedule.every(1).minutes.do(display_renderer.render_nvme_stats)
-    # Render fan speed every 10 seconds
-    schedule.every(10).seconds.do(display_renderer.render_fan_speed)
-    # Render IP address every hour
-    schedule.every(1).hours.do(display_renderer.render_ip_address)
     # Render uptime every minute
     schedule.every(1).minutes.do(display_renderer.render_uptime)
-    # Render current traffic every 10 seconds
-    schedule.every(10).seconds.do(display_renderer.render_current_traffic)
-    # Render current traffic every 30 seconds
-    schedule.every(30).seconds.do(display_renderer.check_net)
+    # Render IP address every hour
+    schedule.every(1).hours.do(display_renderer.render_ip_address)
+    # Get updates every 3 hours
+    schedule.every(3).hours.do(display_renderer.get_updates)
 
     schedule.run_all()
 
