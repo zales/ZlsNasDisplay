@@ -172,9 +172,7 @@ class DisplayRenderer:
         self.draw.text((5, 110), "\ue80d", font=self.nfont14, fill=0)  # Unicode icon for network
 
         if ip_address:
-            self.draw.text(
-                (20, 110), f"{ip_address}", font=self.font14, fill=0
-            )  # Ip address
+            self.draw.text((20, 110), f"{ip_address}", font=self.font14, fill=0)  # Ip address
         else:
             self.draw.text((20, 110), "No IP address!", font=self.font14, fill=0)
 
