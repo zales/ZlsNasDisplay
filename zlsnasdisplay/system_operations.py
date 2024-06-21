@@ -6,6 +6,8 @@ import apt
 import psutil
 from gpiozero import CPUTemperature
 
+from zlsnasdisplay.network_operations import NetworkOperations
+
 
 class SystemOperations:
     cpu = CPUTemperature(min_temp=30, max_temp=90)
@@ -30,7 +32,7 @@ class SystemOperations:
         # Initialize package manager cache
         cache = apt.Cache()
         # Update package informationa
-        if is_root:
+        if is_root and NetworkOperations.check_internet_connection():
             cache.update()
         # Update package list
         cache.open(None)
