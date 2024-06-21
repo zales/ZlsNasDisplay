@@ -108,7 +108,7 @@ class DisplayRenderer:
 
         signal = NetworkOperations.get_signal_strength()
 
-        if signal is not None:
+        if signal:
             self.draw.text((125, 110), "\ue63e", font=self.nfont14, fill=0)  # Unicode icon for wifi
             self.draw.text((140, 110), f"{signal} dBm", font=self.font14, fill=0)  # CPU temperature
         else:
@@ -168,10 +168,15 @@ class DisplayRenderer:
         """Render IP address"""
         self.draw.rectangle((0, 111, 109, 128), fill=255)
 
+        ip_address = NetworkOperations.get_ip_address()
         self.draw.text((5, 110), "\ue80d", font=self.nfont14, fill=0)  # Unicode icon for network
-        self.draw.text(
-            (20, 110), f"{NetworkOperations.get_ip_address()}", font=self.font14, fill=0
-        )  # Ip address
+
+        if ip_address:
+            self.draw.text(
+                (20, 110), f"{ip_address}", font=self.font14, fill=0
+            )  # Ip address
+        else:
+            self.draw.text((20, 110), "No IP address!", font=self.font14, fill=0)
 
         self.update_display_and_save_image()
 
