@@ -51,13 +51,12 @@ class NetworkOperations:
     @staticmethod
     def get_ip_address():
         """Get the IP address of the wireless network."""
-        """Get the IP address of the wireless network."""
         try:
             hostname = socket.gethostname()
             ip_address = socket.gethostbyname(hostname)
             return ip_address
         except socket.gaierror:
-            logging.debug(f"Failed to resolve hostname to IP address. Returning None.")
+            logging.debug("Failed to resolve hostname to IP address. Returning None.")
             return None
 
 
