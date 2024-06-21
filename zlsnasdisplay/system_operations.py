@@ -32,7 +32,7 @@ class SystemOperations:
         # Initialize package manager cache
         cache = apt.Cache()
         # Update package informationa
-        if is_root and NetworkOperations.check_internet_connection:
+        if is_root and NetworkOperations.check_internet_connection():
             cache.update()
         # Update package list
         cache.open(None)
