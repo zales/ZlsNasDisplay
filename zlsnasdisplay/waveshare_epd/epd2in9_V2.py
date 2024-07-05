@@ -10,7 +10,7 @@ GRAY2 = 0xC0
 GRAY3 = 0x80  # gray
 GRAY4 = 0x00  # Blackest
 
-logger = logging.getLogger(__name__)
+# logger = logging.get# logger(__name__)
 
 display = RaspberryPi()
 
@@ -705,10 +705,10 @@ class EPD:
         display.digital_write(self.cs_pin, 1)
 
     def read_busy(self):
-        logger.debug("e-Paper busy")
+        # logger.debug("e-Paper busy")
         while display.digital_read(self.busy_pin) == 1:  #  0: idle, 1: busy
             display.delay_ms(10)
-        logger.debug("e-Paper busy release")
+        # logger.debug("e-Paper busy release")
 
     def turn_on_display(self):
         self.send_command(0x22)  # DISPLAY_UPDATE_CONTROL_2
@@ -857,21 +857,21 @@ class EPD:
         return 0
 
     def get_buffer(self, image):
-        logger.debug("bufsiz = ",int(self.width/8) * self.height)
+        # logger.debug("bufsiz = ",int(self.width/8) * self.height)
         buf = [0xFF] * (int(self.width / 8) * self.height)
         image_monocolor = image.convert("1")
         imwidth, imheight = image_monocolor.size
         pixels = image_monocolor.load()
-        logger.debug("imwidth = %d, imheight = %d",imwidth,imheight)
+        # logger.debug("imwidth = %d, imheight = %d",imwidth,imheight)
         if imwidth == self.width and imheight == self.height:
-            logger.debug("Vertical")
+            # logger.debug("Vertical")
             for y in range(imheight):
                 for x in range(imwidth):
                     # Set the bits for the column of pixels at the current position.
                     if pixels[x, y] == 0:
                         buf[int((x + y * self.width) / 8)] &= ~(0x80 >> (x % 8))
         elif imwidth == self.height and imheight == self.width:
-            logger.debug("Horizontal")
+            # logger.debug("Horizontal")
             for y in range(imheight):
                 for x in range(imwidth):
                     newx = y
@@ -881,15 +881,15 @@ class EPD:
         return buf
 
     def get_buffer_4_gray(self, image):
-        logger.debug("bufsiz = ",int(self.width/8) * self.height)
+        # logger.debug("bufsiz = ",int(self.width/8) * self.height)
         buf = [0xFF] * (int(self.width / 4) * self.height)
         image_monocolor = image.convert("L")
         imwidth, imheight = image_monocolor.size
         pixels = image_monocolor.load()
         i = 0
-        logger.debug("imwidth = %d, imheight = %d",imwidth,imheight)
+        # logger.debug("imwidth = %d, imheight = %d",imwidth,imheight)
         if imwidth == self.width and imheight == self.height:
-            logger.debug("Vertical")
+            # logger.debug("Vertical")
             for y in range(imheight):
                 for x in range(imwidth):
                     # Set the bits for the column of pixels at the current position.
@@ -907,7 +907,7 @@ class EPD:
                         )
 
         elif imwidth == self.height and imheight == self.width:
-            logger.debug("Horizontal")
+            # logger.debug("Horizontal")
             for x in range(imwidth):
                 for y in range(imheight):
                     newx = y
