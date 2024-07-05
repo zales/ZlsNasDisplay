@@ -56,6 +56,8 @@ def main():
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGHUP, signal_handler)
 
+    display_renderer.startup()
+
     # Render current traffic every 10 seconds
     schedule.every(10).seconds.do(display_renderer.render_current_traffic)
     # Render fan speed every 10 seconds
@@ -76,7 +78,10 @@ def main():
     schedule.every(1).hours.do(display_renderer.render_ip_address)
     # Get updates every 3 hours
     schedule.every(3).hours.do(display_renderer.get_updates)
+    # Update display
+    schedule.every(1).seconds.do(display_renderer.update_display_and_save_image)
 
+    display_renderer.render_grid()
     schedule.run_all()
 
     while True:
