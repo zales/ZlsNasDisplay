@@ -120,7 +120,6 @@ class DisplayRenderer:
             (40, 42), f"{SystemOperations().get_cpu_temperature()}°C", font=self.font24, fill=0
         )  # CPU temperature
 
-
     def get_updates(self):
         """Get updates for the display"""
         self.draw.rectangle((214, 83, 248, 105), fill=255)
@@ -149,10 +148,14 @@ class DisplayRenderer:
         signal = NetworkOperations.get_signal_strength()
 
         if signal:
-            self.draw.text((125, 110), "\ue63e", font=self.nfont14, fill=0)  # Unicode icon for Wi-Fi
+            self.draw.text(
+                (125, 110), "\ue63e", font=self.nfont14, fill=0
+            )  # Unicode icon for Wi-Fi
             self.draw.text((140, 110), f"{signal} dBm", font=self.font14, fill=0)  # CPU temperature
         else:
-            self.draw.text((125, 110), "\ue1da", font=self.nfont14, fill=0)  # Unicode icon for Wi-Fi
+            self.draw.text(
+                (125, 110), "\ue1da", font=self.nfont14, fill=0
+            )  # Unicode icon for Wi-Fi
 
     def render_mem(self):
         """Render memory stats"""
@@ -235,4 +238,3 @@ class DisplayRenderer:
         self.draw.text((160, 71), "Loading...", font=self.font14, fill=255)
 
         self.update_display_and_save_image()
-

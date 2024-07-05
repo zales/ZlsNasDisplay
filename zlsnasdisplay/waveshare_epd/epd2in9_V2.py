@@ -14,9 +14,9 @@ logger = logging.getLogger(__name__)
 
 display = RaspberryPi()
 
+
 class EPD:
     def __init__(self):
-
         self.reset_pin = display.RST_PIN
         self.dc_pin = display.DC_PIN
         self.busy_pin = display.BUSY_PIN
@@ -857,12 +857,12 @@ class EPD:
         return 0
 
     def get_buffer(self, image):
-        logger.debug("bufsiz = ",int(self.width/8) * self.height)
+        logger.debug("bufsiz = ", int(self.width / 8) * self.height)
         buf = [0xFF] * (int(self.width / 8) * self.height)
         image_monocolor = image.convert("1")
         imwidth, imheight = image_monocolor.size
         pixels = image_monocolor.load()
-        logger.debug("imwidth = %d, imheight = %d",imwidth,imheight)
+        logger.debug("imwidth = %d, imheight = %d", imwidth, imheight)
         if imwidth == self.width and imheight == self.height:
             logger.debug("Vertical")
             for y in range(imheight):
@@ -881,13 +881,13 @@ class EPD:
         return buf
 
     def get_buffer_4_gray(self, image):
-        logger.debug("bufsiz = ",int(self.width/8) * self.height)
+        logger.debug("bufsiz = ", int(self.width / 8) * self.height)
         buf = [0xFF] * (int(self.width / 4) * self.height)
         image_monocolor = image.convert("L")
         imwidth, imheight = image_monocolor.size
         pixels = image_monocolor.load()
         i = 0
-        logger.debug("imwidth = %d, imheight = %d",imwidth,imheight)
+        logger.debug("imwidth = %d, imheight = %d", imwidth, imheight)
         if imwidth == self.width and imheight == self.height:
             logger.debug("Vertical")
             for y in range(imheight):

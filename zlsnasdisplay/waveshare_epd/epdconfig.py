@@ -6,6 +6,7 @@ import spidev
 
 logger = logging.getLogger(__name__)
 
+
 class RaspberryPi:
     # Pin definition
     RST_PIN = 17
@@ -15,7 +16,6 @@ class RaspberryPi:
     PWR_PIN = 18
 
     def __init__(self):
-
         self.SPI = spidev.SpiDev()
         self.GPIO_RST_PIN = gpiozero.LED(self.RST_PIN)
         self.GPIO_DC_PIN = gpiozero.LED(self.DC_PIN)
