@@ -41,7 +41,7 @@ class RaspberryPi:
 
     def digital_read(self, pin):
         if pin == self.BUSY_PIN:
-            return self.GPIO_BUSY_PIN
+            return self.GPIO_BUSY_PIN.value
         elif pin == self.RST_PIN:
             return self.RST_PIN
         elif pin == self.DC_PIN:

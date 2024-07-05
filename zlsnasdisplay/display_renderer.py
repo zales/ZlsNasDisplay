@@ -231,10 +231,10 @@ class DisplayRenderer:
 
     def startup(self):
         """Render the display loading"""
-        self.draw.rectangle((0, 0, 296, 128), fill=0)
-        self.draw.rectangle((136, 15, 139, 110), fill=255, width=0)
-        self.draw.text((155, 36), "ZlsNas", font=self.font34, fill=255)
-        self.draw.text((65, 36), "\ue80d", font=self.nfont50, fill=255)
-        self.draw.text((160, 71), "Loading...", font=self.font14, fill=255)
+        self.draw.rectangle((0, 0, 296, 128), fill=255)
+        self.draw.rectangle((136, 15, 139, 110), fill=0, width=0)
+        self.draw.text((155, 36), "ZlsNas", font=self.font34, fill=0)
+        self.draw.text((65, 36), "\ue80d", font=self.nfont50, fill=0)
+        self.draw.text((160, 71), "Loading...", font=self.font14, fill=0)
 
         self.update_display_and_save_image()
