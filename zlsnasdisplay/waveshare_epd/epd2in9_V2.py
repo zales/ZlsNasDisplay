@@ -12,31 +12,31 @@ GRAY3 = 0x80  # gray
 GRAY4 = 0x00  # Blackest
 
 # EPD2IN9 commands
-DRIVER_OUTPUT_CONTROL                       = 0x01
-SET_GATE_DRIVING_VOLTAGE                    = 0x03
-SET_SOURCE_OUTPUT_VOLTAGE                   = 0x04
-BOOSTER_SOFT_START_CONTROL                  = 0x0C
-GATE_SCAN_START_POSITION                    = 0x0F
-DEEP_SLEEP_MODE                             = 0x10
-DATA_ENTRY_MODE_SETTING                     = 0x11
-SW_RESET                                    = 0x12
-TEMPERATURE_SENSOR_CONTROL                  = 0x1A
-MASTER_ACTIVATION                           = 0x20
-DISPLAY_UPDATE_CONTROL_1                    = 0x21
-DISPLAY_UPDATE_CONTROL_2                    = 0x22
-WRITE_RAM_1                                 = 0x24
-WRITE_RAM_2                                 = 0x26
-READ_RAM                                    = 0x27
-WRITE_VCOM_REGISTER                         = 0x2C
-WRITE_LUT_REGISTER                          = 0x32
-SET_DUMMY_LINE_PERIOD                       = 0x3A
-SET_GATE_TIME                               = 0x3B
-BORDER_WAVEFORM_CONTROL                     = 0x3C
-SET_RAM_X_ADDRESS_START_END_POSITION        = 0x44
-SET_RAM_Y_ADDRESS_START_END_POSITION        = 0x45
-SET_RAM_X_ADDRESS_COUNTER                   = 0x4E
-SET_RAM_Y_ADDRESS_COUNTER                   = 0x4F
-TERMINATE_FRAME_READ_WRITE                  = 0xFF
+DRIVER_OUTPUT_CONTROL = 0x01
+SET_GATE_DRIVING_VOLTAGE = 0x03
+SET_SOURCE_OUTPUT_VOLTAGE = 0x04
+BOOSTER_SOFT_START_CONTROL = 0x0C
+GATE_SCAN_START_POSITION = 0x0F
+DEEP_SLEEP_MODE = 0x10
+DATA_ENTRY_MODE_SETTING = 0x11
+SW_RESET = 0x12
+TEMPERATURE_SENSOR_CONTROL = 0x1A
+MASTER_ACTIVATION = 0x20
+DISPLAY_UPDATE_CONTROL_1 = 0x21
+DISPLAY_UPDATE_CONTROL_2 = 0x22
+WRITE_RAM_1 = 0x24
+WRITE_RAM_2 = 0x26
+READ_RAM = 0x27
+WRITE_VCOM_REGISTER = 0x2C
+WRITE_LUT_REGISTER = 0x32
+SET_DUMMY_LINE_PERIOD = 0x3A
+SET_GATE_TIME = 0x3B
+BORDER_WAVEFORM_CONTROL = 0x3C
+SET_RAM_X_ADDRESS_START_END_POSITION = 0x44
+SET_RAM_Y_ADDRESS_START_END_POSITION = 0x45
+SET_RAM_X_ADDRESS_COUNTER = 0x4E
+SET_RAM_Y_ADDRESS_COUNTER = 0x4F
+TERMINATE_FRAME_READ_WRITE = 0xFF
 
 logger = logging.getLogger(__name__)
 
@@ -775,24 +775,28 @@ class EPD:
         self.send_data(lut[158])
 
     def set_window(self, x_start, y_start, x_end, y_end):
-        self.send_command(SET_RAM_X_ADDRESS_START_END_POSITION)  # SET_RAM_X_ADDRESS_START_END_POSITION
+        self.send_command(
+            SET_RAM_X_ADDRESS_START_END_POSITION
+        )  # SET_RAM_X_ADDRESS_START_END_POSITION
         # x point must be the multiple of 8 or the last 3 bits will be ignored
-        self.send_data((x_start >> 3) & TERMINATE_FRAME_READ_WRITE)
-        self.send_data((x_end >> 3) & TERMINATE_FRAME_READ_WRITE)
-        self.send_command(SET_RAM_Y_ADDRESS_START_END_POSITION)  # SET_RAM_Y_ADDRESS_START_END_POSITION
-        self.send_data(y_start & TERMINATE_FRAME_READ_WRITE)
-        self.send_data((y_start >> 8) & TERMINATE_FRAME_READ_WRITE)
-        self.send_data(y_end & TERMINATE_FRAME_READ_WRITE)
-        self.send_data((y_end >> 8) & TERMINATE_FRAME_READ_WRITE)
+        self.send_data((x_start >> 3) & 0xFF)
+        self.send_data((x_end >> 3) & 0xFF)
+        self.send_command(
+            SET_RAM_Y_ADDRESS_START_END_POSITION
+        )  # SET_RAM_Y_ADDRESS_START_END_POSITION
+        self.send_data(y_start & 0xFF)
+        self.send_data((y_start >> 8) & 0xFF)
+        self.send_data(y_end & 0xFF)
+        self.send_data((y_end >> 8) & 0xFF)
 
     def set_cursor(self, x, y):
         self.send_command(SET_RAM_X_ADDRESS_COUNTER)  # SET_RAM_X_ADDRESS_COUNTER
         # x point must be the multiple of 8 or the last 3 bits will be ignored
-        self.send_data(x & TERMINATE_FRAME_READ_WRITE)
+        self.send_data(x & 0xFF)
 
         self.send_command(SET_RAM_Y_ADDRESS_COUNTER)  # SET_RAM_Y_ADDRESS_COUNTER
-        self.send_data(y & TERMINATE_FRAME_READ_WRITE)
-        self.send_data((y >> 8) & TERMINATE_FRAME_READ_WRITE)
+        self.send_data(y & 0xFF)
+        self.send_data((y >> 8) & 0xFF)
 
     def basic_init(self):
         if display.module_init() != 0:
@@ -845,7 +849,7 @@ class EPD:
 
     def get_buffer(self, image):
         logger.debug("bufsiz = %d", int(self.width / 8) * self.height)
-        buf = [TERMINATE_FRAME_READ_WRITE] * (int(self.width / 8) * self.height)
+        buf = [0xFF] * (int(self.width / 8) * self.height)
         image_monocolor = image.convert("1")
         imwidth, imheight = image_monocolor.size
         pixels = image_monocolor.load()
@@ -869,7 +873,7 @@ class EPD:
 
     def get_buffer_4_gray(self, image):
         logger.debug("bufsiz = %d", int(self.width / 8) * self.height)
-        buf = [TERMINATE_FRAME_READ_WRITE] * (int(self.width / 4) * self.height)
+        buf = [0xFF] * (int(self.width / 4) * self.height)
         image_monocolor = image.convert("L")
         imwidth, imheight = image_monocolor.size
         pixels = image_monocolor.load()
@@ -1039,7 +1043,7 @@ class EPD:
         self.send_data2(image)
         self.turn_on_display_partial()
 
-    def clear(self, color=TERMINATE_FRAME_READ_WRITE):
+    def clear(self, color=0xFF):
         if self.width % 8 == 0:
             linewidth = int(self.width / 8)
         else:
