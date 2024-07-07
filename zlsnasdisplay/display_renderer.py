@@ -106,7 +106,7 @@ class DisplayRenderer:
         """Update the display and save the image"""
         self.display_controller.update_display(self.image)
         if self.display_image_path:
-            self.image.save(self.display_image_path, "PNG")
+            self.image.save(self.display_image_path, "BMP")
 
     def render_cpu_load(self):
         """Render CPU load"""

@@ -79,7 +79,7 @@ def main():
     # Get updates every 3 hours
     schedule.every(3).hours.do(display_renderer.get_updates)
     # Update display
-    schedule.every(1).seconds.do(display_renderer.update_display_and_save_image)
+    schedule.every(2).seconds.do(display_renderer.update_display_and_save_image)
 
     display_renderer.render_grid()
     schedule.run_all()
