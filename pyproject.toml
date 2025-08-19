@@ -11,7 +11,7 @@ python = "^3.9"
 pillow = ">=10.2,<12.0"
 gpiozero = "^2.0.1"
 schedule = "^1.2.1"
-psutil = ">=5.9.8,<7.0.0"
+psutil = ">=5.9.8,<8.0.0"
 requests = "^2.31.0"
 spidev = "^3.7"
 
