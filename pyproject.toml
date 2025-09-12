@@ -16,7 +16,7 @@ requests = "^2.31.0"
 spidev = "^3.7"
 
 [tool.poetry.group.dev.dependencies]
-mypy = "1.17.1"
+mypy = "1.18.1"
 pre-commit = "4.3.0"
 pytest = "8.4.1"
 pytest-cov = "6.2.1"
