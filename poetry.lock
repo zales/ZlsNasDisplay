@@ -917,14 +917,14 @@ type = ["importlib_metadata (>=7.0.2) ; python_version < \"3.10\"", "jaraco.deve
 
 [[package]]
 name = "spidev"
-version = "3.7"
+version = "3.8"
 description = "Python bindings for Linux SPI access through spidev"
 optional = false
 python-versions = "*"
 groups = ["main"]
 files = [
-    {file = "spidev-3.7-cp39-cp39-linux_armv7l.whl", hash = "sha256:6f9a51d72eac0785d3b7a839c5ee1b6a16a9b711fe053d56adecdf18786e2550"},
-    {file = "spidev-3.7.tar.gz", hash = "sha256:ce628a5ff489f45132679879bff5f455a66abf9751af01843850155b06ae92f0"},
+    {file = "spidev-3.8-cp39-cp39-linux_armv7l.whl", hash = "sha256:07d0da112ca944df41f080811bb123b910df63bb38b66712289bc4fd9d682185"},
+    {file = "spidev-3.8.tar.gz", hash = "sha256:2bc02fb8c6312d519ebf1f4331067427c0921d3f77b8bcaf05189a2e8b8382c0"},
 ]
 
 [[package]]
