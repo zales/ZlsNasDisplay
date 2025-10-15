@@ -4,6 +4,7 @@ import logging
 import os
 import signal
 import sys
+import threading
 import time
 
 import schedule
@@ -14,6 +15,13 @@ from zlsnasdisplay.display_renderer import DisplayRenderer
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 SENTRY_DSN = os.getenv("SENTRY_DSN", False)
 DISPLAY_IMAGE_PATH = os.getenv("DISPLAY_IMAGE_PATH", False)
+ENABLE_WEB_DASHBOARD = os.getenv("ENABLE_WEB_DASHBOARD", "false").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+WEB_DASHBOARD_HOST = os.getenv("WEB_DASHBOARD_HOST", "0.0.0.0")
+WEB_DASHBOARD_PORT = int(os.getenv("WEB_DASHBOARD_PORT", "8000"))
 
 # Configure logging level
 logging.basicConfig(level=LOG_LEVEL)
@@ -32,29 +40,52 @@ if not IS_ROOT:
 
 display_renderer = DisplayRenderer(DISPLAY_IMAGE_PATH, IS_ROOT)
 
+# Global reference for web server thread
+web_server_thread = None
+
 
 # Define signal_handler function to catch SIGINT (Ctrl+C)
-def signal_handler(sig, frame):
+def signal_handler(sig: int, frame: object) -> None:
     """Signal handler function to catch SIGINT (Ctrl+C) and exit the program."""
     logging.info("Exiting the program...")
     # Clear all scheduled jobs
     schedule.clear()
-    time.sleep(1)
-    # Wait for running jobs to complete
-    while schedule.jobs:
-        time.sleep(1)
 
     display_renderer.go_to_sleep()
 
     sys.exit(0)
 
 
-def main():
+def start_web_dashboard() -> None:
+    """Start the web dashboard in a separate thread."""
+    try:
+        from zlsnasdisplay.web_dashboard import run_server
+
+        logging.info(
+            f"Starting web dashboard on http://{WEB_DASHBOARD_HOST}:{WEB_DASHBOARD_PORT}"
+        )
+        run_server(host=WEB_DASHBOARD_HOST, port=WEB_DASHBOARD_PORT, is_root=IS_ROOT)
+    except Exception as e:
+        logging.error(f"Failed to start web dashboard: {e}")
+
+
+def main() -> int:
     """Main function to run the program."""
+    global web_server_thread
 
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGHUP, signal_handler)
+
+    # Start web dashboard if enabled
+    if ENABLE_WEB_DASHBOARD:
+        logging.info("Web dashboard enabled - starting in background thread")
+        web_server_thread = threading.Thread(target=start_web_dashboard, daemon=True)
+        web_server_thread.start()
+    else:
+        logging.info(
+            "Web dashboard disabled. Set ENABLE_WEB_DASHBOARD=true to enable it."
+        )
 
     display_renderer.startup()
 
@@ -85,10 +116,10 @@ def main():
     schedule.run_all()
 
     while True:
-        """ Run the scheduled tasks."""
+        """Run the scheduled tasks."""
         schedule.run_pending()
         time.sleep(1)
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

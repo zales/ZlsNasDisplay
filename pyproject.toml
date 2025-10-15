@@ -14,6 +14,8 @@ schedule = "^1.2.1"
 psutil = ">=5.9.8,<8.0.0"
 requests = "^2.31.0"
 spidev = "^3.7"
+fastapi = "^0.115.0"
+uvicorn = {extras = ["standard"], version = "^0.34.0"}
 
 [tool.poetry.group.dev.dependencies]
 mypy = "1.17.1"
@@ -34,6 +36,10 @@ disallow_untyped_defs = true
 [[tool.mypy.overrides]]
 module = ["tests.*"]
 disallow_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = ["uvicorn.*"]
+ignore_missing_imports = true
 
 [tool.poetry.scripts]
 zlsnasdisplay = 'zlsnasdisplay:main.main()'

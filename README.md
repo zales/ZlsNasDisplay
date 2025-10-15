@@ -42,6 +42,31 @@ Update Frequency: Updated every 10 seconds.
 
 `sudo pip3 install zlsnasdisplay`
 
+## Features
+
+### E-ink Display
+The application renders real-time system statistics on a Waveshare 2.9" e-ink display, providing at-a-glance monitoring directly on your NAS device.
+
+### Web Dashboard (NEW!)
+Access your NAS metrics remotely via a modern, responsive web interface with real-time updates.
+
+- **Real-time monitoring** via WebSocket (2-second updates)
+- **REST API endpoints** for integration with other tools
+- **Responsive design** works on desktop and mobile
+- **Auto-reconnect** handles network interruptions gracefully
+- **Color-coded metrics** for quick status assessment
+
+Enable the web dashboard:
+```bash
+# Set environment variable before running
+export ENABLE_WEB_DASHBOARD=true
+
+# Run the application
+sudo python3 -m zlsnasdisplay
+
+# Access at http://<raspberry-pi-ip>:8000
+```
+
 ## Hardware
 Raspberry Pi (5 tested)
 
@@ -113,11 +138,17 @@ To install the ZlsNasDisplay project using Poetry, you can follow these steps:
     
     `poetry shell`
     
-5.  **Run the Project**: After installing the dependencies, you can run the ZlsNasDisplay project using Poetry. For example, if there's a script defined in the `pyproject.toml` file under `[tool.poetry.scripts]`, you can execute it as follows:
-    
+5.  **Run the Project**: After installing the dependencies, you can run the ZlsNasDisplay project using Poetry:
+
     bashCopy code
-    
-    `poetry run python3 zlsnasdisplay`
+
+    ```bash
+    # Display only
+    poetry run python3 zlsnasdisplay
+
+    # With web dashboard
+    ENABLE_WEB_DASHBOARD=true poetry run python3 zlsnasdisplay
+    ```
 
 ![Motiv](https://github.com/zales/ZlsNasDisplay/assets/832783/a1a764be-8ecd-4063-a75c-506135400a1f)
 

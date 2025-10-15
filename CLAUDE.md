@@ -19,12 +19,42 @@ poetry shell
 
 ### Running the Application
 ```bash
-# Run the application
+# Run the application (display only)
 poetry run python3 zlsnasdisplay
+
+# Run with web dashboard enabled
+ENABLE_WEB_DASHBOARD=true poetry run python3 zlsnasdisplay
+
+# Run web dashboard on custom host/port
+ENABLE_WEB_DASHBOARD=true WEB_DASHBOARD_HOST=0.0.0.0 WEB_DASHBOARD_PORT=8080 poetry run python3 zlsnasdisplay
 
 # Or if in Poetry shell
 python3 -m zlsnasdisplay
 ```
+
+### Web Dashboard
+
+The web dashboard provides a browser-based interface for monitoring NAS metrics in real-time:
+
+```bash
+# Enable via environment variable
+export ENABLE_WEB_DASHBOARD=true
+
+# Optional: Configure host and port (defaults: 0.0.0.0:8000)
+export WEB_DASHBOARD_HOST=0.0.0.0
+export WEB_DASHBOARD_PORT=8000
+
+# Run the application
+poetry run python3 zlsnasdisplay
+
+# Access dashboard at http://<raspberry-pi-ip>:8000
+```
+
+**Features:**
+- Real-time metrics via WebSocket (updates every 2s)
+- REST API endpoints: `/api/metrics`, `/api/health`
+- Responsive HTML dashboard with auto-reconnect
+- Color-coded values (green/yellow/red based on thresholds)
 
 ### Testing
 ```bash
@@ -59,7 +89,8 @@ pre-commit run --all-files
    - Sets up signal handlers for graceful shutdown
    - Configures scheduled tasks using the `schedule` library
    - Different metrics update at different intervals (10s, 30s, 1m, 1h, 3h)
-   - Environment variables: `LOG_LEVEL`, `SENTRY_DSN`, `DISPLAY_IMAGE_PATH`
+   - Environment variables: `LOG_LEVEL`, `SENTRY_DSN`, `DISPLAY_IMAGE_PATH`, `ENABLE_WEB_DASHBOARD`, `WEB_DASHBOARD_HOST`, `WEB_DASHBOARD_PORT`
+   - Optionally runs web dashboard in background thread
 
 2. **display_controller.py** - Hardware abstraction layer
    - Wraps the Waveshare e-ink display driver (`epd2in9_V2`)
@@ -83,7 +114,13 @@ pre-commit run --all-files
    - `TrafficMonitor`: Current upload/download speeds with unit auto-scaling
    - Uses `iwconfig` subprocess for Wi-Fi signal strength
 
-6. **waveshare_epd/** - Third-party e-ink display drivers
+6. **web_dashboard.py** - Web dashboard for remote monitoring (optional)
+   - FastAPI-based REST API for metrics
+   - WebSocket endpoint for real-time updates
+   - Built-in HTML/CSS/JS frontend
+   - Runs in background thread when `ENABLE_WEB_DASHBOARD=true`
+
+7. **waveshare_epd/** - Third-party e-ink display drivers
    - Contains Waveshare's display driver code
    - Should generally not be modified unless updating driver versions
 
@@ -168,8 +205,21 @@ def get_sensor_data() -> int:
 
 ## Testing
 
-Comprehensive test suite with 40+ unit tests:
+Comprehensive test suite with 50+ unit tests:
 - `tests/test_system_operations.py` - SystemOperations class tests
 - `tests/test_network_operations.py` - NetworkOperations and TrafficMonitor tests
+- `tests/test_web_dashboard.py` - Web dashboard API and WebSocket tests
 - All tests use mocks for hardware dependencies
 - Tests cover both success and failure scenarios
+
+To run web dashboard tests:
+```bash
+# Install test dependencies
+poetry install --with dev
+
+# Run all tests
+poetry run pytest
+
+# Run only web dashboard tests
+poetry run pytest tests/test_web_dashboard.py -v
+```
