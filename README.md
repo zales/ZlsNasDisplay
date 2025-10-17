@@ -3,8 +3,9 @@
 ![display (10)](https://github.com/zales/ZlsNasDisplay/assets/832783/6e7828bc-3317-48c0-a1b5-804f8b1b86d2)
 ![display_sleep](https://github.com/zales/ZlsNasDisplay/assets/832783/63055923-21f6-4852-9ad6-2ac78c4181e7)
 
+The ZlsNasDisplay application renders various system statistics onto the e-ink display, providing users with real-time insights into the Raspberry Pi-based NAS device's performance and connectivity. The display uses partial updates for smooth, flicker-free transitions and highlights critical values (CPU load, temperature, memory, disk usage) with inverted colors when thresholds are exceeded.
 
-The ZlsNasDisplay application renders various system statistics onto the e-ink display, providing users with real-time insights into the Raspberry Pi-based NAS device's performance and connectivity. Here's a breakdown of the displayed information and their respective update frequencies:
+Here's a breakdown of the displayed information and their respective update frequencies:
 
 * **CPU Load and Temperature**  
 Displayed Information: The current CPU load percentage and temperature.  
@@ -42,6 +43,40 @@ Update Frequency: Updated every 10 seconds.
 
 `sudo pip3 install zlsnasdisplay`
 
+## Features
+
+### E-ink Display
+The application renders real-time system statistics on a Waveshare 2.9" e-ink display, providing at-a-glance monitoring directly on your NAS device.
+
+**Smart Display Updates:**
+- Uses partial updates for smooth, flicker-free transitions
+- Minimal refresh artifacts for better viewing experience
+
+**Critical Value Highlighting:**
+- CPU load, temperature, memory, and disk usage are monitored against configurable thresholds
+- Values exceeding critical thresholds are highlighted with inverted colors (white text on black background)
+- Provides instant visual feedback when system resources need attention
+
+### Web Dashboard (NEW!)
+Access your NAS metrics remotely via a modern, responsive web interface with real-time updates.
+
+- **Real-time monitoring** via WebSocket (2-second updates)
+- **REST API endpoints** for integration with other tools
+- **Responsive design** works on desktop and mobile
+- **Auto-reconnect** handles network interruptions gracefully
+- **Color-coded metrics** for quick status assessment
+
+Enable the web dashboard:
+```bash
+# Set environment variable before running
+export ENABLE_WEB_DASHBOARD=true
+
+# Run the application
+sudo python3 -m zlsnasdisplay
+
+# Access at http://<raspberry-pi-ip>:8000
+```
+
 ## Hardware
 Raspberry Pi (5 tested)
 
@@ -57,7 +92,8 @@ All necessary information about the wiring and operation is available on the [wa
 ### Dependencies
 
 *   `python`: Python version required for the project (>=3.9).
-*   `pillow`, `gpiozero`, `schedule`, `psutil`, `requests`: Python dependencies with their respective versions required for the project.
+*   `pillow`, `gpiozero`, `schedule`, `psutil`, `requests`, `spidev`, `lgpio`: Python dependencies for display and system monitoring.
+*   `fastapi`, `uvicorn`: Optional dependencies for the web dashboard feature.
 *   `mypy`, `pre-commit`, `pytest`, `pytest-cov`, `ruff`, `tomli`: Development dependencies for linting, testing, and formatting.
 
 #### Build System
@@ -87,37 +123,110 @@ All necessary information about the wiring and operation is available on the [wa
 *   `fix`: Automatically fix linting issues.
 *   `lint`: Configuration for linting rules, select options, and ignored rules.
 
-To install the ZlsNasDisplay project using Poetry, you can follow these steps:
+### Development Setup
 
-1.  **Clone the Repository**: First, clone the repository containing the project's code from GitHub:
-    
-    bashCopy code
-    
-    `git clone https://github.com/zales/ZlsNasDisplay.git`
-    
-2.  **Navigate to the Project Directory**: Change your current directory to the root directory of the cloned project:
-    
-    bashCopy code
-    
-    `cd ZlsNasDisplay`
-    
-3.  **Install Dependencies**: Use Poetry to install the project's dependencies defined in the `pyproject.toml` file:
-    
-    bashCopy code
-    
-    `poetry install`
-    
-4.  **(Optional) Create a Virtual Environment**: If you prefer to isolate the project's dependencies, you can create a virtual environment with Poetry:
-    
-    bashCopy code
-    
-    `poetry shell`
-    
-5.  **Run the Project**: After installing the dependencies, you can run the ZlsNasDisplay project using Poetry. For example, if there's a script defined in the `pyproject.toml` file under `[tool.poetry.scripts]`, you can execute it as follows:
-    
-    bashCopy code
-    
-    `poetry run python3 zlsnasdisplay`
+To install the ZlsNasDisplay project using Poetry:
+
+1.  **Clone the Repository**:
+    ```bash
+    git clone https://github.com/zales/ZlsNasDisplay.git
+    ```
+
+2.  **Navigate to the Project Directory**:
+    ```bash
+    cd ZlsNasDisplay
+    ```
+
+3.  **Install Dependencies**:
+    ```bash
+    poetry install
+    ```
+
+4.  **(Optional) Activate Virtual Environment**:
+    ```bash
+    poetry shell
+    ```
+
+5.  **Run the Project**:
+    ```bash
+    # Display only
+    poetry run python3 -m zlsnasdisplay
+
+    # With web dashboard
+    ENABLE_WEB_DASHBOARD=true poetry run python3 -m zlsnasdisplay
+    ```
+
+### Configuration
+
+You can configure thresholds and other settings via environment variables:
+
+```bash
+# Display update timeout (seconds)
+export DISPLAY_UPDATE_TIMEOUT=10
+
+# Cache TTL values (seconds)
+export DISPLAY_CACHE_TTL_INTERNET=30
+export DISPLAY_CACHE_TTL_SIGNAL=60
+export DISPLAY_CACHE_TTL_IP=3600
+
+# Threshold values for critical highlighting
+export THRESHOLD_CPU_HIGH=70        # CPU load warning threshold (%)
+export THRESHOLD_CPU_CRITICAL=90    # CPU load critical threshold (%)
+export THRESHOLD_TEMP_HIGH=70       # Temperature warning threshold (°C)
+export THRESHOLD_TEMP_CRITICAL=85   # Temperature critical threshold (°C)
+export THRESHOLD_MEM_HIGH=80        # Memory warning threshold (%)
+export THRESHOLD_MEM_CRITICAL=95    # Memory critical threshold (%)
+export THRESHOLD_DISK_HIGH=85       # Disk usage warning threshold (%)
+export THRESHOLD_DISK_CRITICAL=95   # Disk usage critical threshold (%)
+
+# Web dashboard (optional)
+export ENABLE_WEB_DASHBOARD=true
+export WEB_DASHBOARD_HOST=0.0.0.0
+export WEB_DASHBOARD_PORT=8000
+
+# Logging
+export LOG_LEVEL=INFO
+
+# Error tracking (optional)
+export SENTRY_DSN=your-sentry-dsn
+```
+
+### Running as a Service
+
+To run ZlsNasDisplay automatically on boot, create a systemd service:
+
+1. Create service file at `/etc/systemd/system/zlsnasdisplay.service`:
+    ```ini
+    [Unit]
+    Description=ZlsNasDisplay E-ink Monitor
+    After=network.target
+
+    [Service]
+    Type=simple
+    User=root
+    WorkingDirectory=/path/to/ZlsNasDisplay
+    Environment="ENABLE_WEB_DASHBOARD=true"
+    Environment="LOG_LEVEL=INFO"
+    ExecStart=/usr/bin/python3 -m zlsnasdisplay
+    Restart=always
+    RestartSec=10
+
+    [Install]
+    WantedBy=multi-user.target
+    ```
+
+2. Enable and start the service:
+    ```bash
+    sudo systemctl daemon-reload
+    sudo systemctl enable zlsnasdisplay
+    sudo systemctl start zlsnasdisplay
+    ```
+
+3. Check service status:
+    ```bash
+    sudo systemctl status zlsnasdisplay
+    sudo journalctl -u zlsnasdisplay -f
+    ```
 
 ![Motiv](https://github.com/zales/ZlsNasDisplay/assets/832783/a1a764be-8ecd-4063-a75c-506135400a1f)
 

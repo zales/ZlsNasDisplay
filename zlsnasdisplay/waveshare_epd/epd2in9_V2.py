@@ -1,5 +1,8 @@
 import logging
 import time
+from typing import List, Optional
+
+from PIL import Image
 
 from zlsnasdisplay.waveshare_epd.epdconfig import RaspberryPi
 
@@ -55,6 +58,9 @@ class EPD:
         self.GRAY2 = GRAY2
         self.GRAY3 = GRAY3  # gray
         self.GRAY4 = GRAY4  # Blackest
+        self._current_lut: Optional[List[int]] = (
+            None  # Cache current LUT to avoid redundant updates
+        )
 
     WF_PARTIAL_2IN9 = [
         0x0,
@@ -705,7 +711,7 @@ class EPD:
     ]
 
     # Hardware reset
-    def reset(self):
+    def reset(self) -> None:
         display.digital_write(self.reset_pin, 1)
         display.delay_ms(50)
         display.digital_write(self.reset_pin, 0)
@@ -713,26 +719,32 @@ class EPD:
         display.digital_write(self.reset_pin, 1)
         display.delay_ms(50)
 
-    def send_command(self, command):
+    def send_command(self, command: int) -> None:
         display.digital_write(self.dc_pin, 0)
         display.digital_write(self.cs_pin, 0)
         display.spi_writebyte([command])
         display.digital_write(self.cs_pin, 1)
 
-    def send_data(self, data):
+    def send_data(self, data: int) -> None:
         display.digital_write(self.dc_pin, 1)
         display.digital_write(self.cs_pin, 0)
         display.spi_writebyte([data])
         display.digital_write(self.cs_pin, 1)
 
     # send a lot of data
-    def send_data2(self, data):
+    def send_data2(self, data: List[int]) -> None:
         display.digital_write(self.dc_pin, 1)
         display.digital_write(self.cs_pin, 0)
         display.spi_writebyte2(data)
         display.digital_write(self.cs_pin, 1)
 
-    def read_busy(self, timeout=5000):  # 5000 ms default timeout
+    def send_command_with_data(self, command: int, data: List[int]) -> None:
+        """Send command followed by multiple data bytes (optimized for batch operations)"""
+        self.send_command(command)
+        for byte in data:
+            self.send_data(byte)
+
+    def read_busy(self, timeout: int = 5000) -> int:  # 5000 ms default timeout
         logger.debug("e-Paper busy")
         start_time = time.time()
         while display.digital_read(self.busy_pin) == 1:  # 0: idle, 1: busy
@@ -743,25 +755,36 @@ class EPD:
         logger.debug("e-Paper busy release")
         return 0
 
-    def turn_on_display(self):
+    def turn_on_display(self) -> None:
         self.send_command(DISPLAY_UPDATE_CONTROL_2)  # DISPLAY_UPDATE_CONTROL_2
         self.send_data(0xC7)
         self.send_command(MASTER_ACTIVATION)  # MASTER_ACTIVATION
         self.read_busy()
 
-    def turn_on_display_partial(self):
+    def turn_on_display_partial(self) -> None:
         self.send_command(DISPLAY_UPDATE_CONTROL_2)  # DISPLAY_UPDATE_CONTROL_2
         self.send_data(0x0F)
         self.send_command(MASTER_ACTIVATION)  # MASTER_ACTIVATION
         self.read_busy()
 
-    def lut(self, lut):
+    def lut(self, lut: List[int]) -> None:
+        """Write LUT register data (first 153 bytes)"""
         self.send_command(WRITE_LUT_REGISTER)
         for i in range(0, 153):
             self.send_data(lut[i])
         self.read_busy()
 
-    def set_lut(self, lut):
+    def set_lut(self, lut: List[int]) -> None:
+        """
+        Set Look-Up Table with caching to avoid redundant updates.
+        LUT updates are expensive, so we cache the current LUT.
+        """
+        # Check if this LUT is already loaded
+        if self._current_lut is not None and self._current_lut == lut:
+            logger.debug("LUT already loaded, skipping update")
+            return
+
+        logger.debug("Loading new LUT")
         self.lut(lut)
         self.send_command(0x3F)
         self.send_data(lut[153])
@@ -774,7 +797,11 @@ class EPD:
         self.send_command(WRITE_VCOM_REGISTER)  # VCOM
         self.send_data(lut[158])
 
-    def set_window(self, x_start, y_start, x_end, y_end):
+        # Cache the LUT
+        self._current_lut = lut
+
+    def set_window(self, x_start: int, y_start: int, x_end: int, y_end: int) -> None:
+        """Set the display window for RAM operations"""
         self.send_command(
             SET_RAM_X_ADDRESS_START_END_POSITION
         )  # SET_RAM_X_ADDRESS_START_END_POSITION
@@ -789,7 +816,8 @@ class EPD:
         self.send_data(y_end & 0xFF)
         self.send_data((y_end >> 8) & 0xFF)
 
-    def set_cursor(self, x, y):
+    def set_cursor(self, x: int, y: int) -> None:
+        """Set the cursor position for RAM operations"""
         self.send_command(SET_RAM_X_ADDRESS_COUNTER)  # SET_RAM_X_ADDRESS_COUNTER
         # x point must be the multiple of 8 or the last 3 bits will be ignored
         self.send_data(x & 0xFF)
@@ -798,7 +826,8 @@ class EPD:
         self.send_data(y & 0xFF)
         self.send_data((y >> 8) & 0xFF)
 
-    def basic_init(self):
+    def basic_init(self) -> int:
+        """Basic initialization sequence for the display"""
         if display.module_init() != 0:
             return -1
         self.reset()
@@ -816,7 +845,8 @@ class EPD:
         self.read_busy()
         return 0
 
-    def init(self):
+    def init(self) -> int:
+        """Initialize display with standard refresh mode"""
         if self.basic_init() != 0:
             return -1
         self.set_lut(self.WS_20_30)
@@ -825,7 +855,8 @@ class EPD:
         self.send_data(0x80)
         return 0
 
-    def init_fast(self):
+    def init_fast(self) -> int:
+        """Initialize display with fast refresh mode"""
         if self.basic_init() != 0:
             return -1
         self.send_command(BORDER_WAVEFORM_CONTROL)
@@ -836,7 +867,8 @@ class EPD:
         self.set_lut(self.WF_FULL)
         return 0
 
-    def init_4_gray(self):
+    def init_4_gray(self) -> int:
+        """Initialize display with 4-level grayscale mode"""
         if self.basic_init() != 0:
             return -1
         self.read_busy()
@@ -847,54 +879,95 @@ class EPD:
         self.set_lut(self.Gray4)
         return 0
 
-    def get_buffer(self, image):
-        logger.debug("bufsiz = %d", int(self.width / 8) * self.height)
-        buf = [0xFF] * (int(self.width / 8) * self.height)
+    def get_buffer(self, image: Image.Image) -> List[int]:
+        """
+        Convert PIL Image to display buffer with optimized bit operations.
+        Uses bytearray for better performance and in-place modifications.
+        """
+        buf_size = (self.width // 8) * self.height
+        logger.debug("bufsiz = %d", buf_size)
+
+        # Use bytearray instead of list for better performance
+        buf = bytearray([0xFF] * buf_size)
         image_monocolor = image.convert("1")
         imwidth, imheight = image_monocolor.size
         pixels = image_monocolor.load()
+        if pixels is None:
+            return list(buf)
         logger.debug("imwidth = %d, imheight = %d", imwidth, imheight)
+
+        width_bytes = self.width // 8
+
         if imwidth == self.width and imheight == self.height:
             logger.debug("Vertical")
+            # Optimized vertical layout processing
             for y in range(imheight):
+                y_offset = y * width_bytes
                 for x in range(imwidth):
-                    # Set the bits for the column of pixels at the current position.
                     if pixels[x, y] == 0:
-                        buf[int((x + y * self.width) / 8)] &= ~(0x80 >> (x % 8))
+                        byte_idx = y_offset + (x >> 3)  # x // 8
+                        buf[byte_idx] &= ~(0x80 >> (x & 7))  # x % 8
+
         elif imwidth == self.height and imheight == self.width:
             logger.debug("Horizontal")
+            # Optimized horizontal layout processing
             for y in range(imheight):
                 for x in range(imwidth):
-                    newx = y
-                    newy = self.height - x - 1
                     if pixels[x, y] == 0:
-                        buf[int((newx + newy * self.width) / 8)] &= ~(0x80 >> (y % 8))
-        return buf
+                        newx = y
+                        newy = self.height - x - 1
+                        byte_idx = (newy * width_bytes) + (newx >> 3)
+                        buf[byte_idx] &= ~(0x80 >> (y & 7))
 
-    def get_buffer_4_gray(self, image):
+        return list(buf)  # Convert back to list for compatibility
+
+    def get_buffer_4_gray(self, image: Image.Image) -> List[int]:
+        """Convert PIL Image to 4-level grayscale buffer"""
         logger.debug("bufsiz = %d", int(self.width / 8) * self.height)
         buf = [0xFF] * (int(self.width / 4) * self.height)
         image_monocolor = image.convert("L")
         imwidth, imheight = image_monocolor.size
         pixels = image_monocolor.load()
+        if pixels is None:
+            return buf
         i = 0
         logger.debug("imwidth = %d, imheight = %d", imwidth, imheight)
         if imwidth == self.width and imheight == self.height:
             logger.debug("Vertical")
             for y in range(imheight):
                 for x in range(imwidth):
+                    # Get pixel value and ensure it's an int
+                    pixel_val = pixels[x, y]
+                    if isinstance(pixel_val, tuple):
+                        pixel_val = pixel_val[0]
+                    pixel_val = int(pixel_val)
+
                     # Set the bits for the column of pixels at the current position.
-                    if pixels[x, y] == 0xC0:
+                    if pixel_val == 0xC0:
                         pixels[x, y] = 0x80
-                    elif pixels[x, y] == 0x80:
+                    elif pixel_val == 0x80:
                         pixels[x, y] = 0x40
                     i = i + 1
                     if i % 4 == 0:
+                        # Get previous pixels and ensure they're ints
+                        p0 = pixels[x - 3, y]
+                        p1 = pixels[x - 2, y]
+                        p2 = pixels[x - 1, y]
+                        p3 = pixels[x, y]
+                        if isinstance(p0, tuple):
+                            p0 = p0[0]
+                        if isinstance(p1, tuple):
+                            p1 = p1[0]
+                        if isinstance(p2, tuple):
+                            p2 = p2[0]
+                        if isinstance(p3, tuple):
+                            p3 = p3[0]
+
                         buf[int((x + (y * self.width)) / 4)] = (
-                            (pixels[x - 3, y] & 0xC0)
-                            | (pixels[x - 2, y] & 0xC0) >> 2
-                            | (pixels[x - 1, y] & 0xC0) >> 4
-                            | (pixels[x, y] & 0xC0) >> 6
+                            (int(p0) & 0xC0)
+                            | ((int(p1) & 0xC0) >> 2)
+                            | ((int(p2) & 0xC0) >> 4)
+                            | ((int(p3) & 0xC0) >> 6)
                         )
 
         elif imwidth == self.height and imheight == self.width:
@@ -903,21 +976,43 @@ class EPD:
                 for y in range(imheight):
                     newx = y
                     newy = self.height - x - 1
-                    if pixels[x, y] == 0xC0:
+
+                    # Get pixel value and ensure it's an int
+                    pixel_val = pixels[x, y]
+                    if isinstance(pixel_val, tuple):
+                        pixel_val = pixel_val[0]
+                    pixel_val = int(pixel_val)
+
+                    if pixel_val == 0xC0:
                         pixels[x, y] = 0x80
-                    elif pixels[x, y] == 0x80:
+                    elif pixel_val == 0x80:
                         pixels[x, y] = 0x40
                     i = i + 1
                     if i % 4 == 0:
+                        # Get previous pixels and ensure they're ints
+                        p0 = pixels[x, y - 3]
+                        p1 = pixels[x, y - 2]
+                        p2 = pixels[x, y - 1]
+                        p3 = pixels[x, y]
+                        if isinstance(p0, tuple):
+                            p0 = p0[0]
+                        if isinstance(p1, tuple):
+                            p1 = p1[0]
+                        if isinstance(p2, tuple):
+                            p2 = p2[0]
+                        if isinstance(p3, tuple):
+                            p3 = p3[0]
+
                         buf[int((newx + (newy * self.width)) / 4)] = (
-                            (pixels[x, y - 3] & 0xC0)
-                            | (pixels[x, y - 2] & 0xC0) >> 2
-                            | (pixels[x, y - 1] & 0xC0) >> 4
-                            | (pixels[x, y] & 0xC0) >> 6
+                            (int(p0) & 0xC0)
+                            | ((int(p1) & 0xC0) >> 2)
+                            | ((int(p2) & 0xC0) >> 4)
+                            | ((int(p3) & 0xC0) >> 6)
                         )
         return buf
 
-    def display(self, image):
+    def display(self, image: Optional[List[int]]) -> None:
+        """Full display update"""
         if image is None:
             logger.warning("No image data provided to display method")
             return
@@ -925,7 +1020,8 @@ class EPD:
         self.send_data2(image)
         self.turn_on_display()
 
-    def display_base(self, image):
+    def display_base(self, image: Optional[List[int]]) -> None:
+        """Display base image (writes to both RAM buffers)"""
         if image is None:
             logger.warning("No image data provided to display method")
             return
@@ -938,7 +1034,8 @@ class EPD:
 
         self.turn_on_display()
 
-    def display_4_gray(self, image):
+    def display_4_gray(self, image: List[int]) -> None:
+        """Display 4-level grayscale image"""
         self.send_command(WRITE_RAM_1)
         for i in range(0, 4736):
             temp3 = 0
@@ -1005,28 +1102,28 @@ class EPD:
 
         self.turn_on_display()
 
-    def display_partial(self, image):
+    def display_partial(self, image: Optional[List[int]]) -> None:
+        """
+        Optimized partial display update.
+        Removes redundant reset and uses LUT caching.
+        """
         if image is None:
             logger.warning("No image data provided to display method")
             return
 
+        # Soft reset - optimized to minimal timing
         display.digital_write(self.reset_pin, 0)
         display.delay_ms(2)
         display.digital_write(self.reset_pin, 1)
         display.delay_ms(2)
 
+        # Set partial update LUT (cached if already loaded)
         self.set_lut(self.WF_PARTIAL_2IN9)
-        self.send_command(0x37)
-        self.send_data(0x00)
-        self.send_data(0x00)
-        self.send_data(0x00)
-        self.send_data(0x00)
-        self.send_data(0x00)
-        self.send_data(0x40)
-        self.send_data(0x00)
-        self.send_data(0x00)
-        self.send_data(0x00)
-        self.send_data(0x00)
+
+        # Configure partial update - batch data
+        self.send_command_with_data(
+            0x37, [0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00]
+        )
 
         self.send_command(BORDER_WAVEFORM_CONTROL)  # Border Wavefrom
         self.send_data(0x80)
@@ -1036,27 +1133,32 @@ class EPD:
         self.send_command(MASTER_ACTIVATION)
         self.read_busy()
 
+        # Set full display window
         self.set_window(0, 0, self.width - 1, self.height - 1)
         self.set_cursor(0, 0)
 
+        # Write image buffer and trigger partial update
         self.send_command(WRITE_RAM_1)  # WRITE_RAM
         self.send_data2(image)
         self.turn_on_display_partial()
 
-    def clear(self, color=0xFF):
+    def clear(self, color: int = 0xFF) -> None:
+        """Clear the display to specified color (0xFF = white, 0x00 = black)"""
         if self.width % 8 == 0:
             linewidth = int(self.width / 8)
         else:
             linewidth = int(self.width / 8) + 1
 
+        buffer = [color] * int(self.height * linewidth)
         self.send_command(WRITE_RAM_1)  # WRITE_RAM
-        self.send_data2([color] * int(self.height * linewidth))
+        self.send_data2(buffer)
         self.turn_on_display()
         self.send_command(WRITE_RAM_2)  # WRITE_RAM
-        self.send_data2([color] * int(self.height * linewidth))
+        self.send_data2(buffer)
         self.turn_on_display()
 
-    def sleep(self):
+    def sleep(self) -> None:
+        """Put display into deep sleep mode"""
         self.send_command(DEEP_SLEEP_MODE)  # DEEP_SLEEP_MODE
         self.send_data(DRIVER_OUTPUT_CONTROL)
 

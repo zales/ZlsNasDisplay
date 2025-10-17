@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "zlsnasdisplay"
-version = "2.0.3"
+version = "3.0.0"
 description = "Eink display manager"
 authors = ["Ondrej Zalesky <o.zalesky@gmail.com>"]
 license = "MIT"
@@ -14,6 +14,9 @@ schedule = "^1.2.1"
 psutil = ">=5.9.8,<8.0.0"
 requests = "^2.31.0"
 spidev = "^3.7"
+fastapi = "^0.115.0"
+uvicorn = {extras = ["standard"], version = "^0.34.0"}
+lgpio = "^0.2.2.0"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "1.17.1"
@@ -35,8 +38,16 @@ disallow_untyped_defs = true
 module = ["tests.*"]
 disallow_untyped_defs = false
 
+[[tool.mypy.overrides]]
+module = ["uvicorn.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["zlsnasdisplay.waveshare_epd.*"]
+disallow_untyped_defs = false
+
 [tool.poetry.scripts]
-zlsnasdisplay = 'zlsnasdisplay:main.main()'
+zlsnasdisplay = 'zlsnasdisplay.main:main'
 
 [tool.pytest.ini_options]
 minversion = "6.0"
