@@ -43,13 +43,14 @@ class DisplayRenderer:
             "ip_address": float(Config.DISPLAY_CACHE_TTL_IP),
         }
 
-
         # Define directories for fonts and the e-paper display library
         fontdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "fonts")
 
         # Load fonts with validation
         self.font34 = self._load_font(fontdir, "Ubuntu-Regular.ttf", 34)
-        self.font26 = self._load_font(fontdir, "Ubuntu-Regular.ttf", 26)  # New larger font for main values
+        self.font26 = self._load_font(
+            fontdir, "Ubuntu-Regular.ttf", 26
+        )  # New larger font for main values
         self.font24 = self._load_font(fontdir, "Ubuntu-Regular.ttf", 24)
         self.font20 = self._load_font(fontdir, "Ubuntu-Regular.ttf", 20)
         self.font14 = self._load_font(fontdir, "Ubuntu-Light.ttf", 14)
@@ -143,7 +144,9 @@ class DisplayRenderer:
                 fill=bar_color,
             )
 
-    def _is_value_critical(self, value: float, threshold_high: float, threshold_critical: float) -> tuple[bool, bool]:
+    def _is_value_critical(
+        self, value: float, threshold_high: float, threshold_critical: float
+    ) -> tuple[bool, bool]:
         """Check if a value exceeds thresholds.
 
         Args:
@@ -159,8 +162,12 @@ class DisplayRenderer:
         return is_high, is_critical
 
     def _draw_text_with_highlight(
-        self, x: int, y: int, text: str, font: ImageFont.FreeTypeFont | ImageFont.ImageFont,
-        is_critical: bool = False
+        self,
+        x: int,
+        y: int,
+        text: str,
+        font: ImageFont.FreeTypeFont | ImageFont.ImageFont,
+        is_critical: bool = False,
     ) -> None:
         """Draw text with optional highlighting for critical values.
 
@@ -239,9 +246,7 @@ class DisplayRenderer:
         self.draw.line(
             [(34, cfg.MEM_LINE_Y), (cfg.SECTION_CPU_RIGHT, cfg.MEM_LINE_Y)], fill=0, width=0
         )
-        self.draw.text(
-            (cfg.MEM_ICON_X, cfg.MEM_ICON_Y), cfg.ICON_MEMORY, font=self.nfont24, fill=0
-        )
+        self.draw.text((cfg.MEM_ICON_X, cfg.MEM_ICON_Y), cfg.ICON_MEMORY, font=self.nfont24, fill=0)
 
         # DISK
         self.draw.text((cfg.NVME_LABEL_X, cfg.NVME_LABEL_Y), "nvme", font=self.font14, fill=0)
@@ -266,14 +271,10 @@ class DisplayRenderer:
         self.draw.line(
             [(124, cfg.FAN_LINE_Y), (cfg.SECTION_NVME_RIGHT, cfg.FAN_LINE_Y)], fill=0, width=0
         )
-        self.draw.text(
-            (cfg.FAN_ICON_X, cfg.FAN_ICON_Y), cfg.ICON_FAN, font=self.nfont24, fill=0
-        )
+        self.draw.text((cfg.FAN_ICON_X, cfg.FAN_ICON_Y), cfg.ICON_FAN, font=self.nfont24, fill=0)
 
         # IP
-        self.draw.text(
-            (cfg.IP_ICON_X, cfg.IP_ICON_Y), cfg.ICON_NETWORK, font=self.nfont14, fill=0
-        )
+        self.draw.text((cfg.IP_ICON_X, cfg.IP_ICON_Y), cfg.ICON_NETWORK, font=self.nfont14, fill=0)
 
         # UPTIME
         self.draw.text(
@@ -326,9 +327,7 @@ class DisplayRenderer:
                 signal.alarm(0)
 
         except TimeoutError:
-            logging.error(
-                f"Display update timed out after {Config.DISPLAY_UPDATE_TIMEOUT} seconds"
-            )
+            logging.error(f"Display update timed out after {Config.DISPLAY_UPDATE_TIMEOUT} seconds")
         except Exception as e:
             logging.error(f"Display update failed: {e}", exc_info=True)
 
@@ -350,18 +349,20 @@ class DisplayRenderer:
 
         # Draw CPU load with highlighting
         self._draw_text_with_highlight(
-            cfg.CPU_VALUE_X, cfg.CPU_VALUE_Y_LOAD,
+            cfg.CPU_VALUE_X,
+            cfg.CPU_VALUE_Y_LOAD,
             f"{cpu_load}%",
             self.font24,
-            is_critical=cpu_critical
+            is_critical=cpu_critical,
         )
 
         # Draw temperature with highlighting
         self._draw_text_with_highlight(
-            cfg.CPU_VALUE_X, cfg.CPU_VALUE_Y_TEMP,
+            cfg.CPU_VALUE_X,
+            cfg.CPU_VALUE_Y_TEMP,
             f"{cpu_temp}°C",
             self.font24,
-            is_critical=temp_critical
+            is_critical=temp_critical,
         )
 
     def get_updates(self) -> None:
@@ -438,10 +439,7 @@ class DisplayRenderer:
 
         # Draw memory usage with highlighting
         self._draw_text_with_highlight(
-            cfg.MEM_VALUE_X, cfg.MEM_VALUE_Y,
-            f"{mem_usage}%",
-            self.font26,
-            is_critical=mem_critical
+            cfg.MEM_VALUE_X, cfg.MEM_VALUE_Y, f"{mem_usage}%", self.font26, is_critical=mem_critical
         )
 
     def render_nvme_stats(self) -> None:
@@ -462,18 +460,20 @@ class DisplayRenderer:
 
         # Draw disk usage with highlighting
         self._draw_text_with_highlight(
-            cfg.NVME_VALUE_X, cfg.NVME_VALUE_Y_DISK,
+            cfg.NVME_VALUE_X,
+            cfg.NVME_VALUE_Y_DISK,
             f"{nvme_usage}%",
             self.font26,
-            is_critical=disk_critical
+            is_critical=disk_critical,
         )
 
         # Draw temperature with highlighting
         self._draw_text_with_highlight(
-            cfg.NVME_VALUE_X, cfg.NVME_VALUE_Y_TEMP,
+            cfg.NVME_VALUE_X,
+            cfg.NVME_VALUE_Y_TEMP,
             f"{nvme_temp}°C",
             self.font26,
-            is_critical=temp_critical
+            is_critical=temp_critical,
         )
 
     def render_fan_speed(self) -> None:
@@ -494,13 +494,9 @@ class DisplayRenderer:
         ip_address = self._get_cached_value("ip_address", self.network_ops.get_ip_address)
 
         if ip_address:
-            self.draw.text(
-                (cfg.IP_VALUE_X, cfg.IP_VALUE_Y), ip_address, font=self.font14, fill=0
-            )
+            self.draw.text((cfg.IP_VALUE_X, cfg.IP_VALUE_Y), ip_address, font=self.font14, fill=0)
         else:
-            self.draw.text(
-                (cfg.IP_VALUE_X, cfg.IP_VALUE_Y), "No IP!", font=self.font14, fill=0
-            )
+            self.draw.text((cfg.IP_VALUE_X, cfg.IP_VALUE_Y), "No IP!", font=self.font14, fill=0)
 
     def render_uptime(self) -> None:
         """Render uptime"""

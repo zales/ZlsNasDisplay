@@ -21,9 +21,7 @@ class TestSystemOperations:
 
     def test_get_cpu_load_exception(self):
         """Test CPU load retrieval with exception."""
-        with mock.patch(
-            "zlsnasdisplay.system_operations.psutil.cpu_percent"
-        ) as mock_cpu:
+        with mock.patch("zlsnasdisplay.system_operations.psutil.cpu_percent") as mock_cpu:
             mock_cpu.side_effect = AttributeError("Test error")
             result = SystemOperations.get_cpu_load()
             assert result == 0
@@ -54,9 +52,7 @@ class TestSystemOperations:
 
     def test_get_fan_speed_exception(self):
         """Test fan speed retrieval with exception."""
-        with mock.patch(
-            "zlsnasdisplay.system_operations.psutil.sensors_fans"
-        ) as mock_fans:
+        with mock.patch("zlsnasdisplay.system_operations.psutil.sensors_fans") as mock_fans:
             mock_fans.side_effect = KeyError("Test error")
             result = SystemOperations.get_fan_speed()
             assert result == 0
@@ -87,9 +83,7 @@ class TestSystemOperations:
         mock_disk = mock.MagicMock()
         mock_disk.percent = 75.3
 
-        with mock.patch(
-            "zlsnasdisplay.system_operations.psutil.disk_usage"
-        ) as mock_disk_usage:
+        with mock.patch("zlsnasdisplay.system_operations.psutil.disk_usage") as mock_disk_usage:
             mock_disk_usage.return_value = mock_disk
             result = SystemOperations.get_nvme_usage()
             assert result == 75
@@ -97,9 +91,7 @@ class TestSystemOperations:
 
     def test_get_nvme_usage_exception(self):
         """Test NVMe disk usage retrieval with exception."""
-        with mock.patch(
-            "zlsnasdisplay.system_operations.psutil.disk_usage"
-        ) as mock_disk_usage:
+        with mock.patch("zlsnasdisplay.system_operations.psutil.disk_usage") as mock_disk_usage:
             mock_disk_usage.side_effect = OSError("Test error")
             result = SystemOperations.get_nvme_usage()
             assert result == 0
@@ -161,9 +153,7 @@ class TestSystemOperations:
 
     def test_get_uptime_exception(self):
         """Test uptime retrieval with exception."""
-        with mock.patch(
-            "zlsnasdisplay.system_operations.psutil.boot_time"
-        ) as mock_boot:
+        with mock.patch("zlsnasdisplay.system_operations.psutil.boot_time") as mock_boot:
             mock_boot.side_effect = OSError("Test error")
             result = SystemOperations.get_uptime()
             assert result == (0, 0, 0)

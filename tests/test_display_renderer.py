@@ -93,7 +93,9 @@ def renderer(
         yield renderer
 
 
-def test_display_renderer_init(mock_display_controller, mock_traffic_monitor, mock_font, mock_image_draw):
+def test_display_renderer_init(
+    mock_display_controller, mock_traffic_monitor, mock_font, mock_image_draw
+):
     """Test DisplayRenderer initialization"""
     with patch("os.path.exists", return_value=True), patch(
         "zlsnasdisplay.display_renderer.ImageFont.truetype"
@@ -110,7 +112,9 @@ def test_display_renderer_init(mock_display_controller, mock_traffic_monitor, mo
         mock_display_controller.clear_display.assert_called_once()
 
 
-def test_load_font_success(mock_display_controller, mock_traffic_monitor, mock_font, mock_image_draw):
+def test_load_font_success(
+    mock_display_controller, mock_traffic_monitor, mock_font, mock_image_draw
+):
     """Test successful font loading"""
     with patch("os.path.exists", return_value=True), patch(
         "zlsnasdisplay.display_renderer.ImageFont.truetype"
@@ -127,7 +131,9 @@ def test_load_font_success(mock_display_controller, mock_traffic_monitor, mock_f
         assert font == mock_font_instance
 
 
-def test_load_font_fallback_on_missing_file(mock_display_controller, mock_traffic_monitor, mock_font, mock_image_draw):
+def test_load_font_fallback_on_missing_file(
+    mock_display_controller, mock_traffic_monitor, mock_font, mock_image_draw
+):
     """Test font loading falls back to default when file is missing"""
     with patch("os.path.exists") as mock_exists, patch(
         "zlsnasdisplay.display_renderer.ImageFont.truetype"
@@ -149,7 +155,9 @@ def test_load_font_fallback_on_missing_file(mock_display_controller, mock_traffi
         mock_default.assert_called()
 
 
-def test_load_font_fallback_on_oserror(mock_display_controller, mock_traffic_monitor, mock_font, mock_image_draw):
+def test_load_font_fallback_on_oserror(
+    mock_display_controller, mock_traffic_monitor, mock_font, mock_image_draw
+):
     """Test font loading falls back to default on OSError"""
     with patch("os.path.exists", return_value=True), patch(
         "zlsnasdisplay.display_renderer.ImageFont.truetype"

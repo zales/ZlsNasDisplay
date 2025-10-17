@@ -708,9 +708,7 @@ def run_server(host: str = "0.0.0.0", port: int = 8000, is_root: bool = False) -
     asyncio.set_event_loop(loop)
 
     # Configure uvicorn server
-    config = uvicorn.Config(
-        app=app, host=host, port=port, log_level="info", loop="asyncio"
-    )
+    config = uvicorn.Config(app=app, host=host, port=port, log_level="info", loop="asyncio")
     server = uvicorn.Server(config)
 
     logging.info(f"Starting web dashboard on http://{host}:{port}")

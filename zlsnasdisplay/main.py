@@ -80,9 +80,7 @@ def main() -> int:
             web_server_thread = threading.Thread(target=start_web_dashboard, daemon=True)
             web_server_thread.start()
     else:
-        logging.info(
-            "Web dashboard disabled. Set ENABLE_WEB_DASHBOARD=true to enable it."
-        )
+        logging.info("Web dashboard disabled. Set ENABLE_WEB_DASHBOARD=true to enable it.")
 
     display_renderer.startup()
 

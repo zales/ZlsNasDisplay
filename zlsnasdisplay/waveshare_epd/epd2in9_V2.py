@@ -58,7 +58,9 @@ class EPD:
         self.GRAY2 = GRAY2
         self.GRAY3 = GRAY3  # gray
         self.GRAY4 = GRAY4  # Blackest
-        self._current_lut: Optional[List[int]] = None  # Cache current LUT to avoid redundant updates
+        self._current_lut: Optional[List[int]] = (
+            None  # Cache current LUT to avoid redundant updates
+        )
 
     WF_PARTIAL_2IN9 = [
         0x0,
@@ -1119,7 +1121,9 @@ class EPD:
         self.set_lut(self.WF_PARTIAL_2IN9)
 
         # Configure partial update - batch data
-        self.send_command_with_data(0x37, [0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00])
+        self.send_command_with_data(
+            0x37, [0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00]
+        )
 
         self.send_command(BORDER_WAVEFORM_CONTROL)  # Border Wavefrom
         self.send_data(0x80)

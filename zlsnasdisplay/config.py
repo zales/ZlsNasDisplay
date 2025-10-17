@@ -33,29 +33,19 @@ class Config:
     WEB_DASHBOARD_PORT: int = int(os.getenv("WEB_DASHBOARD_PORT", "8000"))
 
     # Web dashboard advanced settings
-    WEB_METRICS_UPDATE_INTERVAL: int = int(
-        os.getenv("WEB_METRICS_UPDATE_INTERVAL", "2")
-    )  # seconds
-    WEB_CACHE_TTL_INTERNET: int = int(
-        os.getenv("WEB_CACHE_TTL_INTERNET", "30")
-    )  # seconds
+    WEB_METRICS_UPDATE_INTERVAL: int = int(os.getenv("WEB_METRICS_UPDATE_INTERVAL", "2"))  # seconds
+    WEB_CACHE_TTL_INTERNET: int = int(os.getenv("WEB_CACHE_TTL_INTERNET", "30"))  # seconds
     WEB_CACHE_TTL_SIGNAL: int = int(os.getenv("WEB_CACHE_TTL_SIGNAL", "30"))  # seconds
     WEB_CACHE_TTL_IP: int = int(os.getenv("WEB_CACHE_TTL_IP", "300"))  # seconds
     WEB_THREAD_POOL_WORKERS: int = int(os.getenv("WEB_THREAD_POOL_WORKERS", "3"))
 
     # Display renderer cache settings
-    DISPLAY_CACHE_TTL_INTERNET: int = int(
-        os.getenv("DISPLAY_CACHE_TTL_INTERNET", "30")
-    )  # seconds
-    DISPLAY_CACHE_TTL_SIGNAL: int = int(
-        os.getenv("DISPLAY_CACHE_TTL_SIGNAL", "60")
-    )  # seconds
+    DISPLAY_CACHE_TTL_INTERNET: int = int(os.getenv("DISPLAY_CACHE_TTL_INTERNET", "30"))  # seconds
+    DISPLAY_CACHE_TTL_SIGNAL: int = int(os.getenv("DISPLAY_CACHE_TTL_SIGNAL", "60"))  # seconds
     DISPLAY_CACHE_TTL_IP: int = int(os.getenv("DISPLAY_CACHE_TTL_IP", "300"))  # seconds
 
     # Display update timeout
-    DISPLAY_UPDATE_TIMEOUT: int = int(
-        os.getenv("DISPLAY_UPDATE_TIMEOUT", "30")
-    )  # seconds
+    DISPLAY_UPDATE_TIMEOUT: int = int(os.getenv("DISPLAY_UPDATE_TIMEOUT", "30"))  # seconds
 
     # Historical data retention (for graphs)
     HISTORY_MAX_ENTRIES: int = int(
