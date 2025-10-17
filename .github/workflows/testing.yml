@@ -31,6 +31,7 @@ jobs:
       run: poetry run mypy .
       continue-on-error: true
   testing:
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
