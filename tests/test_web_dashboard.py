@@ -8,14 +8,22 @@ from fastapi.testclient import TestClient
 
 from zlsnasdisplay.web_dashboard import MetricsCollector, create_app
 
+# Use asyncio backend only
+pytestmark = pytest.mark.anyio
+
 
 class TestMetricsCollector:
     """Test MetricsCollector class."""
 
+    @pytest.fixture(scope="class")
+    def anyio_backend(self):
+        """Use asyncio backend only."""
+        return "asyncio"
+
     @mock.patch("zlsnasdisplay.web_dashboard.TrafficMonitor")
     @mock.patch("zlsnasdisplay.web_dashboard.SystemOperations")
     @mock.patch("zlsnasdisplay.web_dashboard.NetworkOperations")
-    def test_get_all_metrics_success(
+    async def test_get_all_metrics_success(
         self, mock_network_ops, mock_system_ops, mock_traffic_monitor
     ):
         """Test successful metrics collection."""
@@ -41,7 +49,7 @@ class TestMetricsCollector:
         mock_net_instance.check_internet_connection.return_value = True
 
         collector = MetricsCollector(is_root=True)
-        metrics = collector.get_all_metrics()
+        metrics = await collector.get_all_metrics()
 
         # Verify structure
         assert "timestamp" in metrics
@@ -71,7 +79,7 @@ class TestMetricsCollector:
     @mock.patch("zlsnasdisplay.web_dashboard.TrafficMonitor")
     @mock.patch("zlsnasdisplay.web_dashboard.SystemOperations")
     @mock.patch("zlsnasdisplay.web_dashboard.NetworkOperations")
-    def test_get_all_metrics_with_exception(
+    async def test_get_all_metrics_with_exception(
         self, mock_network_ops, mock_system_ops, mock_traffic_monitor
     ):
         """Test metrics collection with exception handling."""
@@ -80,7 +88,7 @@ class TestMetricsCollector:
         mock_traffic_instance.get_current_traffic.side_effect = Exception("Network error")
 
         collector = MetricsCollector(is_root=False)
-        metrics = collector.get_all_metrics()
+        metrics = await collector.get_all_metrics()
 
         # Should return error structure
         assert "error" in metrics

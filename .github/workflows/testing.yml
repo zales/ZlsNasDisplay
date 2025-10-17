@@ -52,3 +52,13 @@ jobs:
         cache: "poetry"
     - name: Install Dependencies
       run: poetry install
+    - name: Run tests
+      run: poetry run pytest -v --cov-report=xml --cov-report=term-missing
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      if: matrix.python-version == '3.11'
+      with:
+        files: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false

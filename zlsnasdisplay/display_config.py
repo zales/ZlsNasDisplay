@@ -127,3 +127,17 @@ ICON_WIFI_OK = "\ue2bf"
 ICON_WIFI_OFF = "\uf1ca"
 ICON_WIFI_SIGNAL = "\ue63e"
 ICON_WIFI_NO_SIGNAL = "\ue1da"
+
+# Thresholds for highlighting
+THRESHOLD_CPU_HIGH = 80  # CPU usage %
+THRESHOLD_CPU_CRITICAL = 95  # CPU usage %
+THRESHOLD_TEMP_HIGH = 70  # Temperature °C
+THRESHOLD_TEMP_CRITICAL = 80  # Temperature °C
+THRESHOLD_MEM_HIGH = 80  # Memory usage %
+THRESHOLD_MEM_CRITICAL = 90  # Memory usage %
+THRESHOLD_DISK_HIGH = 85  # Disk usage %
+THRESHOLD_DISK_CRITICAL = 95  # Disk usage %
+
+# Progress bar settings
+PROGRESS_BAR_HEIGHT = 3
+PROGRESS_BAR_BORDER = 1

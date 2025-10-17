@@ -32,17 +32,19 @@ def mock_system_operations():
         instance.get_fan_speed.return_value = 3500
         instance.get_uptime.return_value = (1, 12, 34)
         mock.return_value = instance
-        yield mock
+        yield instance
 
 
 @pytest.fixture
 def mock_network_operations():
     """Fixture to mock NetworkOperations"""
     with patch("zlsnasdisplay.display_renderer.NetworkOperations") as mock:
-        mock.get_ip_address.return_value = "192.168.1.100"
-        mock.get_signal_strength.return_value = -50
-        mock.check_internet_connection.return_value = True
-        yield mock
+        instance = MagicMock()
+        instance.get_ip_address.return_value = "192.168.1.100"
+        instance.get_signal_strength.return_value = -50
+        instance.check_internet_connection.return_value = True
+        mock.return_value = instance
+        yield instance
 
 
 @pytest.fixture
@@ -74,7 +76,14 @@ def mock_image_draw():
 
 
 @pytest.fixture
-def renderer(mock_display_controller, mock_traffic_monitor, mock_font, mock_image_draw):
+def renderer(
+    mock_display_controller,
+    mock_traffic_monitor,
+    mock_system_operations,
+    mock_network_operations,
+    mock_font,
+    mock_image_draw,
+):
     """Fixture to create a DisplayRenderer instance with mocked dependencies"""
     with patch("os.path.exists", return_value=True), patch(
         "zlsnasdisplay.display_renderer.ImageFont.truetype"
@@ -147,8 +156,8 @@ def test_load_font_fallback_on_oserror(mock_display_controller, mock_traffic_mon
     ) as mock_truetype, patch(
         "zlsnasdisplay.display_renderer.ImageFont.load_default"
     ) as mock_default:
-        # First calls during init should succeed
-        mock_truetype.side_effect = [mock_font] * 7 + [OSError("Font error")]
+        # First calls during init should succeed (8 fonts now: 34, 26, 24, 20, 14, 50, 24, 14)
+        mock_truetype.side_effect = [mock_font] * 8 + [OSError("Font error")]
         mock_default.return_value = mock_font
 
         renderer = DisplayRenderer(display_image_path=None, is_root=False)
@@ -179,35 +188,37 @@ def test_render_cpu_load(renderer, mock_system_operations):
     renderer.render_cpu_load()
 
     # Verify SystemOperations was called
-    mock_system_operations.return_value.get_cpu_load.assert_called()
-    mock_system_operations.return_value.get_cpu_temperature.assert_called()
+    mock_system_operations.get_cpu_load.assert_called()
+    mock_system_operations.get_cpu_temperature.assert_called()
 
 
 def test_get_updates_with_updates(renderer, mock_system_operations):
     """Test rendering system updates when updates are available"""
-    mock_system_operations.return_value.check_updates.return_value = 5
+    mock_system_operations.check_updates.return_value = 5
 
     renderer.get_updates()
 
-    mock_system_operations.return_value.check_updates.assert_called_with(False)
+    mock_system_operations.check_updates.assert_called_with(False)
 
 
 def test_get_updates_no_updates(renderer, mock_system_operations):
     """Test rendering system updates when no updates available"""
-    mock_system_operations.return_value.check_updates.return_value = 0
+    mock_system_operations.check_updates.return_value = 0
 
     renderer.get_updates()
 
-    mock_system_operations.return_value.check_updates.assert_called_with(False)
+    mock_system_operations.check_updates.assert_called_with(False)
 
 
 def test_check_net_connected(renderer, mock_network_operations):
     """Test checking network when internet is connected"""
+    # Cache will call it, so we need to set return value
     mock_network_operations.check_internet_connection.return_value = True
 
     renderer.check_net()
 
-    mock_network_operations.check_internet_connection.assert_called()
+    # Should be called via cache
+    assert mock_network_operations.check_internet_connection.called
 
 
 def test_check_net_disconnected(renderer, mock_network_operations):
@@ -216,7 +227,8 @@ def test_check_net_disconnected(renderer, mock_network_operations):
 
     renderer.check_net()
 
-    mock_network_operations.check_internet_connection.assert_called()
+    # Should be called via cache
+    assert mock_network_operations.check_internet_connection.called
 
 
 def test_render_signal_strength_with_signal(renderer, mock_network_operations):
@@ -225,7 +237,8 @@ def test_render_signal_strength_with_signal(renderer, mock_network_operations):
 
     renderer.render_signal_strength()
 
-    mock_network_operations.get_signal_strength.assert_called()
+    # Should be called via cache
+    assert mock_network_operations.get_signal_strength.called
 
 
 def test_render_signal_strength_no_signal(renderer, mock_network_operations):
@@ -234,7 +247,8 @@ def test_render_signal_strength_no_signal(renderer, mock_network_operations):
 
     renderer.render_signal_strength()
 
-    mock_network_operations.get_signal_strength.assert_called()
+    # Should be called via cache
+    assert mock_network_operations.get_signal_strength.called
 
 
 def test_render_mem(renderer, mock_system_operations):
@@ -272,7 +286,8 @@ def test_render_ip_address_with_ip(renderer, mock_network_operations):
 
     renderer.render_ip_address()
 
-    mock_network_operations.get_ip_address.assert_called()
+    # Should be called via cache
+    assert mock_network_operations.get_ip_address.called
 
 
 def test_render_ip_address_no_ip(renderer, mock_network_operations):
@@ -281,7 +296,8 @@ def test_render_ip_address_no_ip(renderer, mock_network_operations):
 
     renderer.render_ip_address()
 
-    mock_network_operations.get_ip_address.assert_called()
+    # Should be called via cache
+    assert mock_network_operations.get_ip_address.called
 
 
 def test_render_uptime(renderer, mock_system_operations):

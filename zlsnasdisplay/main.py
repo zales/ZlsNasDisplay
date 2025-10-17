@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 
 import logging
-import os
 import signal
 import sys
 import threading
@@ -9,36 +8,23 @@ import time
 
 import schedule
 
+from zlsnasdisplay.config import Config
 from zlsnasdisplay.display_renderer import DisplayRenderer
 
-# GET ENVIRONMENT VARIABLES
-LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
-SENTRY_DSN = os.getenv("SENTRY_DSN", False)
-DISPLAY_IMAGE_PATH = os.getenv("DISPLAY_IMAGE_PATH", False)
-ENABLE_WEB_DASHBOARD = os.getenv("ENABLE_WEB_DASHBOARD", "false").lower() in (
-    "true",
-    "1",
-    "yes",
-)
-WEB_DASHBOARD_HOST = os.getenv("WEB_DASHBOARD_HOST", "0.0.0.0")
-WEB_DASHBOARD_PORT = int(os.getenv("WEB_DASHBOARD_PORT", "8000"))
-
 # Configure logging level
-logging.basicConfig(level=LOG_LEVEL)
+logging.basicConfig(level=Config.LOG_LEVEL)
 
-if SENTRY_DSN:
+if Config.SENTRY_DSN:
     import sentry_sdk
 
     # Initialize Sentry for error tracking
-    sentry_sdk.init(SENTRY_DSN)
+    sentry_sdk.init(Config.SENTRY_DSN)
 
-# Detect sudo
-IS_ROOT = os.getuid() == 0
-
-if not IS_ROOT:
+# Check root privileges
+if not Config.is_root():
     logging.warning("The script does not run as root. Cannot perform apt update!")
 
-display_renderer = DisplayRenderer(DISPLAY_IMAGE_PATH, IS_ROOT)
+display_renderer = DisplayRenderer(Config.DISPLAY_IMAGE_PATH, Config.is_root())
 
 # Global reference for web server thread
 web_server_thread = None
@@ -62,11 +48,15 @@ def start_web_dashboard() -> None:
         from zlsnasdisplay.web_dashboard import run_server
 
         logging.info(
-            f"Starting web dashboard on http://{WEB_DASHBOARD_HOST}:{WEB_DASHBOARD_PORT}"
+            f"Starting web dashboard on http://{Config.WEB_DASHBOARD_HOST}:{Config.WEB_DASHBOARD_PORT}"
         )
-        run_server(host=WEB_DASHBOARD_HOST, port=WEB_DASHBOARD_PORT, is_root=IS_ROOT)
+        run_server(
+            host=Config.WEB_DASHBOARD_HOST,
+            port=Config.WEB_DASHBOARD_PORT,
+            is_root=Config.is_root(),
+        )
     except Exception as e:
-        logging.error(f"Failed to start web dashboard: {e}")
+        logging.error(f"Failed to start web dashboard: {e}", exc_info=True)
 
 
 def main() -> int:
@@ -78,10 +68,17 @@ def main() -> int:
     signal.signal(signal.SIGHUP, signal_handler)
 
     # Start web dashboard if enabled
-    if ENABLE_WEB_DASHBOARD:
-        logging.info("Web dashboard enabled - starting in background thread")
-        web_server_thread = threading.Thread(target=start_web_dashboard, daemon=True)
-        web_server_thread.start()
+    if Config.ENABLE_WEB_DASHBOARD:
+        # Import FastAPI in main thread to avoid Pydantic initialization issues
+        try:
+            from zlsnasdisplay.web_dashboard import run_server  # noqa: F401
+        except ImportError as e:
+            logging.error(f"Failed to import web dashboard: {e}")
+            logging.info("Continuing without web dashboard")
+        else:
+            logging.info("Web dashboard enabled - starting in background thread")
+            web_server_thread = threading.Thread(target=start_web_dashboard, daemon=True)
+            web_server_thread.start()
     else:
         logging.info(
             "Web dashboard disabled. Set ENABLE_WEB_DASHBOARD=true to enable it."
