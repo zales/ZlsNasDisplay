@@ -92,58 +92,6 @@ class DisplayRenderer:
             # Return default PIL font as fallback
             return ImageFont.load_default()
 
-    def _draw_progress_bar(
-        self, x: int, y: int, width: int, percentage: float, invert: bool = False
-    ) -> None:
-        """Draw a progress bar at the specified position.
-
-        Args:
-            x: X coordinate of the top-left corner
-            y: Y coordinate of the top-left corner
-            width: Width of the progress bar
-            percentage: Percentage value (0-100)
-            invert: If True, draw inverted colors (for highlighting critical values)
-        """
-        # Clamp percentage to 0-100
-        percentage = max(0, min(100, percentage))
-
-        # Calculate filled width
-        filled_width = int((width - 2 * cfg.PROGRESS_BAR_BORDER) * percentage / 100)
-
-        # Draw border
-        border_color = 255 if invert else 0
-        fill_color = 0 if invert else 255
-        bar_color = 255 if invert else 0
-
-        self.draw.rectangle(
-            (x, y, x + width, y + cfg.PROGRESS_BAR_HEIGHT),
-            fill=border_color,
-            outline=border_color,
-        )
-
-        # Draw background
-        self.draw.rectangle(
-            (
-                x + cfg.PROGRESS_BAR_BORDER,
-                y + cfg.PROGRESS_BAR_BORDER,
-                x + width - cfg.PROGRESS_BAR_BORDER,
-                y + cfg.PROGRESS_BAR_HEIGHT - cfg.PROGRESS_BAR_BORDER,
-            ),
-            fill=fill_color,
-        )
-
-        # Draw filled portion
-        if filled_width > 0:
-            self.draw.rectangle(
-                (
-                    x + cfg.PROGRESS_BAR_BORDER,
-                    y + cfg.PROGRESS_BAR_BORDER,
-                    x + cfg.PROGRESS_BAR_BORDER + filled_width,
-                    y + cfg.PROGRESS_BAR_HEIGHT - cfg.PROGRESS_BAR_BORDER,
-                ),
-                fill=bar_color,
-            )
-
     def _is_value_critical(
         self, value: float, threshold_high: float, threshold_critical: float
     ) -> tuple[bool, bool]:
@@ -307,7 +255,7 @@ class DisplayRenderer:
             fill=0,
         )
 
-    def _timeout_handler(self, signum: int, frame: Any) -> None:
+    def _timeout_handler(self, _signum: int, _frame: Any) -> None:
         """Handler for timeout signal."""
         raise TimeoutError("Display update operation timed out")
 
@@ -402,7 +350,9 @@ class DisplayRenderer:
         """Render signal strength"""
         self.draw.rectangle((125, 111, 200, 128), fill=255)
 
-        signal = self._get_cached_value("signal_strength", self.network_ops.get_signal_strength)
+        signal = self._get_cached_value(
+            "signal_strength", lambda: self.network_ops.get_signal_strength()
+        )
 
         if signal:
             self.draw.text(
@@ -491,7 +441,9 @@ class DisplayRenderer:
         """Render full IP address"""
         self.draw.rectangle((20, 113, 123, 126), fill=255)
 
-        ip_address = self._get_cached_value("ip_address", self.network_ops.get_ip_address)
+        ip_address = self._get_cached_value(
+            "ip_address", lambda: self.network_ops.get_ip_address()
+        )
 
         if ip_address:
             self.draw.text((cfg.IP_VALUE_X, cfg.IP_VALUE_Y), ip_address, font=self.font14, fill=0)

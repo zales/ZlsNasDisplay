@@ -12,6 +12,7 @@ from zlsnasdisplay.network_operations import NetworkOperations
 
 class SystemOperations:
     cpu = CPUTemperature(min_temp=30, max_temp=90)
+    _last_cpu_times: tuple[float, ...] | None = None
 
     def get_cpu_temperature(self) -> int:
         """Get the CPU temperature in Celsius"""
@@ -21,12 +22,46 @@ class SystemOperations:
             logging.warning(f"Failed to get CPU temperature: {e}")
             return 0
 
-    @staticmethod
-    def get_cpu_load() -> int:
-        """Get the CPU load in percentage"""
+    @classmethod
+    def get_cpu_load(cls) -> int:
+        """Get the CPU load in percentage using cached measurements (non-blocking)."""
         try:
-            return int(psutil.cpu_percent())
-        except (AttributeError, ValueError, TypeError) as e:
+            # Get current CPU times
+            current = psutil.cpu_times()
+
+            # First call - initialize cache and return 0
+            if cls._last_cpu_times is None:
+                cls._last_cpu_times = tuple(current)
+                # Prime cpu_percent for future non-blocking calls
+                psutil.cpu_percent(interval=None)
+                return 0
+
+            # Calculate time spent in each state
+            prev = cls._last_cpu_times
+            deltas = [getattr(current, field) - prev[i] for i, field in enumerate(current._fields)]
+
+            # Update cache
+            cls._last_cpu_times = tuple(current)
+
+            # Calculate total time
+            total = sum(deltas)
+            if total == 0:
+                return 0
+
+            # Calculate idle time (idle + iowait if available)
+            idle_idx = current._fields.index("idle")
+            idle = deltas[idle_idx]
+
+            # Some systems have iowait, add it to idle time
+            if "iowait" in current._fields:
+                iowait_idx = current._fields.index("iowait")
+                idle += deltas[iowait_idx]
+
+            # CPU usage = (total - idle) / total * 100
+            cpu_usage = int(100 * (total - idle) / total)
+            return max(0, min(100, cpu_usage))  # Clamp to 0-100
+
+        except (AttributeError, ValueError, TypeError, IndexError) as e:
             logging.warning(f"Failed to get CPU load: {e}")
             return 0
 

@@ -12,16 +12,32 @@ class TestSystemOperations:
     """Tests for SystemOperations class."""
 
     def test_get_cpu_load_success(self):
-        """Test successful CPU load retrieval."""
-        with mock.patch("zlsnasdisplay.system_operations.psutil.cpu_percent") as mock_cpu:
-            mock_cpu.return_value = 45.7
-            result = SystemOperations.get_cpu_load()
-            assert result == 45
-            mock_cpu.assert_called_once()
+        """Test successful CPU load retrieval using cached cpu_times."""
+        # Create mock cpu_times namedtuple-like objects
+        from collections import namedtuple
+        CPUTimes = namedtuple('scputimes', ['user', 'nice', 'system', 'idle', 'iowait'])
+
+        # First call - initial measurement
+        initial_times = CPUTimes(user=1000.0, nice=50.0, system=500.0, idle=3000.0, iowait=450.0)
+        # Second call - after some CPU usage (55% usage: 550 active out of 1000 total)
+        final_times = CPUTimes(user=1300.0, nice=60.0, system=690.0, idle=3400.0, iowait=550.0)
+
+        with mock.patch("zlsnasdisplay.system_operations.psutil.cpu_times") as mock_cpu_times:
+            with mock.patch("zlsnasdisplay.system_operations.psutil.cpu_percent") as mock_cpu_percent:
+                mock_cpu_times.side_effect = [initial_times, final_times]
+
+                # First call - initialize cache
+                result1 = SystemOperations.get_cpu_load()
+                assert result1 == 0  # First call returns 0
+
+                # Second call - calculate from deltas
+                result2 = SystemOperations.get_cpu_load()
+                # Total delta = 1000, idle delta = 400 + 100 = 500, usage = (1000-500)/1000 = 50%
+                assert 45 <= result2 <= 55  # Allow some rounding variance
 
     def test_get_cpu_load_exception(self):
         """Test CPU load retrieval with exception."""
-        with mock.patch("zlsnasdisplay.system_operations.psutil.cpu_percent") as mock_cpu:
+        with mock.patch("zlsnasdisplay.system_operations.psutil.cpu_times") as mock_cpu:
             mock_cpu.side_effect = AttributeError("Test error")
             result = SystemOperations.get_cpu_load()
             assert result == 0

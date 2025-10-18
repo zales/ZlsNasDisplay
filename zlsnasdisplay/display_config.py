@@ -137,7 +137,3 @@ THRESHOLD_MEM_HIGH = 80  # Memory usage %
 THRESHOLD_MEM_CRITICAL = 90  # Memory usage %
 THRESHOLD_DISK_HIGH = 85  # Disk usage %
 THRESHOLD_DISK_CRITICAL = 95  # Disk usage %
-
-# Progress bar settings
-PROGRESS_BAR_HEIGHT = 3
-PROGRESS_BAR_BORDER = 1

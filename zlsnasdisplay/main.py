@@ -26,12 +26,8 @@ if not Config.is_root():
 
 display_renderer = DisplayRenderer(Config.DISPLAY_IMAGE_PATH, Config.is_root())
 
-# Global reference for web server thread
-web_server_thread = None
-
-
 # Define signal_handler function to catch SIGINT (Ctrl+C)
-def signal_handler(sig: int, frame: object) -> None:
+def signal_handler(_sig: int, _frame: object) -> None:
     """Signal handler function to catch SIGINT (Ctrl+C) and exit the program."""
     logging.info("Exiting the program...")
     # Clear all scheduled jobs
@@ -61,7 +57,12 @@ def start_web_dashboard() -> None:
 
 def main() -> int:
     """Main function to run the program."""
-    global web_server_thread
+    # Validate configuration on startup
+    config_warnings = Config.validate()
+    if config_warnings:
+        logging.warning("Configuration validation warnings:")
+        for warning in config_warnings:
+            logging.warning(f"  - {warning}")
 
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
@@ -69,16 +70,9 @@ def main() -> int:
 
     # Start web dashboard if enabled
     if Config.ENABLE_WEB_DASHBOARD:
-        # Import FastAPI in main thread to avoid Pydantic initialization issues
-        try:
-            from zlsnasdisplay.web_dashboard import run_server  # noqa: F401
-        except ImportError as e:
-            logging.error(f"Failed to import web dashboard: {e}")
-            logging.info("Continuing without web dashboard")
-        else:
-            logging.info("Web dashboard enabled - starting in background thread")
-            web_server_thread = threading.Thread(target=start_web_dashboard, daemon=True)
-            web_server_thread.start()
+        logging.info("Web dashboard enabled - starting in background thread")
+        web_dashboard_thread = threading.Thread(target=start_web_dashboard, daemon=True)
+        web_dashboard_thread.start()
     else:
         logging.info("Web dashboard disabled. Set ENABLE_WEB_DASHBOARD=true to enable it.")
 
