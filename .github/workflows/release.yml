@@ -154,7 +154,7 @@ jobs:
             pip install zlsnasdisplay==${{ steps.get_version.outputs.VERSION }}
 
             # On Raspberry Pi with GPIO hardware:
-            pip install zlsnasdisplay[${{ steps.get_version.outputs.VERSION }}] -E hardware
+            pip install "zlsnasdisplay[hardware]==${{ steps.get_version.outputs.VERSION }}"
             ```
 
             ### Using Poetry
@@ -162,7 +162,7 @@ jobs:
             poetry add zlsnasdisplay@${{ steps.get_version.outputs.VERSION }}
 
             # With hardware support:
-            poetry add zlsnasdisplay@${{ steps.get_version.outputs.VERSION }} -E hardware
+            poetry add zlsnasdisplay@${{ steps.get_version.outputs.VERSION }} --extras hardware
             ```
 
             ### From source
