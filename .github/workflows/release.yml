@@ -67,6 +67,19 @@ jobs:
           poetry build
           ls -lh dist/
 
+      - name: Build binary with PyInstaller
+        run: |
+          poetry run pyinstaller zlsnasdisplay.spec
+          ls -lh dist/zlsnasdisplay
+
+      - name: Create binary tarball
+        run: |
+          mkdir -p release-binary/zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}
+          cp dist/zlsnasdisplay release-binary/zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}/
+          cp README.md LICENSE release-binary/zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}/
+          cd release-binary
+          tar -czf zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}-linux-aarch64.tar.gz zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}
+
       - name: Generate comprehensive changelog
         id: changelog
         run: |
@@ -122,7 +135,21 @@ jobs:
 
             ## 📦 Installation
 
-            ### Using pip (Recommended)
+            ### Standalone Binary (No Python Required)
+
+            Download and run the pre-built binary for Raspberry Pi (aarch64):
+
+            ```bash
+            # Download and extract
+            wget https://github.com/${{ github.repository }}/releases/download/v${{ steps.get_version.outputs.VERSION }}/zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}-linux-aarch64.tar.gz
+            tar -xzf zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}-linux-aarch64.tar.gz
+            cd zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}
+
+            # Run directly
+            ./zlsnasdisplay
+            ```
+
+            ### Using pip (Recommended for Python users)
             ```bash
             pip install zlsnasdisplay==${{ steps.get_version.outputs.VERSION }}
 
@@ -198,6 +225,7 @@ jobs:
             📚 **Documentation**: https://github.com/${{ github.repository }}/blob/main/README.md
             🐛 **Report Issues**: https://github.com/${{ github.repository }}/issues
           files: |
+            release-binary/zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}-linux-aarch64.tar.gz
             release/zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}-python.tar.gz
             dist/*.whl
             dist/*.tar.gz
