@@ -1,6 +1,5 @@
 """Tests for web dashboard module."""
 
-import json
 from unittest import mock
 
 import pytest

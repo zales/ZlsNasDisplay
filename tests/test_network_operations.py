@@ -3,7 +3,6 @@
 import socket
 from unittest import mock
 
-import psutil
 import pytest
 
 from zlsnasdisplay.network_operations import NetworkOperations, TrafficMonitor

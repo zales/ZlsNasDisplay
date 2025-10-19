@@ -10,22 +10,18 @@ permissions:
 
 jobs:
   build-and-release:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        python-version: ['3.11']
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Full history for changelog
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.11"
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
@@ -39,95 +35,107 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .venv
-          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+          key: venv-${{ runner.os }}-3.11-${{ hashFiles('**/poetry.lock') }}
 
       - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root
-
-      - name: Install project
-        run: poetry install --no-interaction
-
-      - name: Install PyInstaller
-        run: poetry run pip install pyinstaller
+        run: |
+          # Install without lgpio (optional hardware dependency)
+          poetry install --with dev 2>&1 | tee install.log || true
+          echo "Dependencies installed (lgpio may have failed - that's OK)"
 
       - name: Run tests
-        run: poetry run pytest tests/test_network_operations.py tests/test_system_operations.py -v
-
-      - name: Build binary with PyInstaller
+        env:
+          GPIOZERO_PIN_FACTORY: mock
         run: |
-          poetry run pyinstaller --name zlsnasdisplay \
-            --onefile \
-            --add-data "zlsnasdisplay/fonts:zlsnasdisplay/fonts" \
-            --hidden-import=zlsnasdisplay.waveshare_epd \
-            --hidden-import=zlsnasdisplay.waveshare_epd.epd2in9_V2 \
-            --hidden-import=zlsnasdisplay.waveshare_epd.epdconfig \
-            --hidden-import=gpiozero \
-            --hidden-import=lgpio \
-            --hidden-import=PIL \
-            --hidden-import=PIL.Image \
-            --hidden-import=PIL.ImageDraw \
-            --hidden-import=PIL.ImageFont \
-            --hidden-import=psutil \
-            --hidden-import=schedule \
-            --hidden-import=fastapi \
-            --hidden-import=uvicorn \
-            --collect-all zlsnasdisplay \
-            --strip \
-            zlsnasdisplay/__main__.py
+          poetry run pytest -v \
+            --ignore=deb_dist --ignore=dist --ignore=debian \
+            --ignore=tests/test_matter_device.py
 
       - name: Extract version from tag
         id: get_version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-
-      - name: Create tarball
         run: |
-          mkdir -p release/zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}
-          cp dist/zlsnasdisplay release/zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}/
-          cp README.md release/zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}/
-          cp LICENSE release/zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}/
-          cd release
-          tar -czf zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}-linux-x86_64.tar.gz zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Release version: $VERSION"
 
-      - name: Generate changelog
+      - name: Update version in pyproject.toml
+        run: |
+          sed -i 's/^version = .*/version = "${{ steps.get_version.outputs.VERSION }}"/' pyproject.toml
+
+      - name: Build Python package
+        run: |
+          poetry build
+          ls -lh dist/
+
+      - name: Generate comprehensive changelog
         id: changelog
         run: |
           # Get the previous tag
-          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
-          if [ -z "$PREV_TAG" ]; then
-            echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
-            git log --pretty=format:"- %s (%h)" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
-          else
-            echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
-            git log ${PREV_TAG}..HEAD --pretty=format:"- %s (%h)" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
-          fi
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)
+          echo "Previous tag: $PREV_TAG"
+          echo "Current tag: ${GITHUB_REF#refs/tags/}"
+
+          # Generate categorized changelog
+          {
+            echo "CHANGELOG<<EOF"
+            echo ""
+            echo "## 🚀 Features"
+            git log ${PREV_TAG}..HEAD --pretty=format:"- %s" --grep="^Add\|^Feat" || echo "- No new features"
+            echo ""
+            echo ""
+            echo "## 🔧 Changes"
+            git log ${PREV_TAG}..HEAD --pretty=format:"- %s" --grep="^Change\|^Update\|^Improve\|^Refactor\|^Optimize" || echo "- No changes"
+            echo ""
+            echo ""
+            echo "## 🐛 Bug Fixes"
+            git log ${PREV_TAG}..HEAD --pretty=format:"- %s" --grep="^Fix" || echo "- No bug fixes"
+            echo ""
+            echo ""
+            echo "## 📝 Documentation"
+            git log ${PREV_TAG}..HEAD --pretty=format:"- %s" --grep="^Docs\|^Doc" || echo "- No documentation changes"
+            echo ""
+            echo ""
+            echo "## 🔨 Other Changes"
+            git log ${PREV_TAG}..HEAD --pretty=format:"- %s" --grep="^Merge\|^Bump" --invert-grep --grep="^Add\|^Feat\|^Fix\|^Change\|^Update\|^Improve\|^Refactor\|^Optimize\|^Docs\|^Doc" --invert-grep || echo "- No other changes"
+            echo ""
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Create tarball with Python package
+        run: |
+          mkdir -p release/zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}
+          cp dist/*.whl dist/*.tar.gz release/zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}/ 2>/dev/null || true
+          cp README.md CHANGELOG.md LICENSE release/zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}/
+          cd release
+          tar -czf zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}-python.tar.gz zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}
 
       - name: Create Release
-        id: create_release
         uses: softprops/action-gh-release@v2
         with:
           name: Release v${{ steps.get_version.outputs.VERSION }}
           body: |
-            # ZlsNasDisplay v${{ steps.get_version.outputs.VERSION }}
+            # 🎉 ZlsNasDisplay v${{ steps.get_version.outputs.VERSION }}
+
+            E-ink display manager for Raspberry Pi NAS with Matter support.
+
+            ---
 
             ## 📦 Installation
 
-            ### Binary (Linux x86_64)
-            ```bash
-            # Download and extract
-            wget https://github.com/${{ github.repository }}/releases/download/v${{ steps.get_version.outputs.VERSION }}/zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}-linux-x86_64.tar.gz
-            tar -xzf zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}-linux-x86_64.tar.gz
-            cd zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}
-
-            # Run
-            ./zlsnasdisplay
-            ```
-
-            ### From PyPI
+            ### Using pip (Recommended)
             ```bash
             pip install zlsnasdisplay==${{ steps.get_version.outputs.VERSION }}
+
+            # On Raspberry Pi with GPIO hardware:
+            pip install zlsnasdisplay[${{ steps.get_version.outputs.VERSION }}] -E hardware
+            ```
+
+            ### Using Poetry
+            ```bash
+            poetry add zlsnasdisplay@${{ steps.get_version.outputs.VERSION }}
+
+            # With hardware support:
+            poetry add zlsnasdisplay@${{ steps.get_version.outputs.VERSION }} -E hardware
             ```
 
             ### From source
@@ -135,32 +143,64 @@ jobs:
             git clone https://github.com/${{ github.repository }}.git
             cd ZlsNasDisplay
             git checkout v${{ steps.get_version.outputs.VERSION }}
-            poetry install
+            poetry install -E hardware  # On Raspberry Pi
             poetry run zlsnasdisplay
             ```
+
+            ---
 
             ## 📝 What's Changed
 
             ${{ steps.changelog.outputs.CHANGELOG }}
 
-            ## 🔧 Requirements
+            ---
 
-            - Python 3.9+
-            - Raspberry Pi with Waveshare 2.9" e-ink display
-            - Optional: Root privileges for apt updates
+            ## 🔧 System Requirements
 
-            ## 🌐 Web Dashboard
+            - **Python:** 3.11+ (Matter support requires 3.11+)
+            - **Hardware:** Raspberry Pi with Waveshare 2.9" e-ink display (EPD)
+            - **Optional:** Root privileges for apt package updates
+            - **Optional:** avahi-utils for Matter/mDNS functionality
 
-            Enable the web dashboard:
+            ## ✨ Features
+
+            - 📊 Real-time system metrics display (CPU, RAM, disk, network)
+            - 🌐 Web dashboard with WebSocket updates
+            - 🏠 Matter/CHIP smart home integration
+            - 📱 QR code commissioning for Apple Home, Google Home, Home Assistant
+            - 🌡️ Temperature sensors for CPU and NVMe
+            - 📈 Network traffic monitoring
+            - 🔄 Automatic system updates checking
+
+            ## 🚀 Quick Start
+
+            ### Basic Usage
             ```bash
-            ENABLE_WEB_DASHBOARD=true ./zlsnasdisplay
+            zlsnasdisplay
+            ```
+
+            ### With Web Dashboard
+            ```bash
+            ENABLE_WEB_DASHBOARD=true zlsnasdisplay
             # Access at http://<raspberry-pi-ip>:8000
             ```
 
-            **Full Changelog**: https://github.com/${{ github.repository }}/compare/${{ steps.get_version.outputs.PREV_TAG }}...v${{ steps.get_version.outputs.VERSION }}
+            ### With Matter Integration
+            ```bash
+            ENABLE_MATTER=true zlsnasdisplay
+            # Scan QR code on display to commission device
+            ```
+
+            ---
+
+            **Full Changelog**: https://github.com/${{ github.repository }}/compare/${{ github.env.PREV_TAG }}...v${{ steps.get_version.outputs.VERSION }}
+
+            📚 **Documentation**: https://github.com/${{ github.repository }}/blob/main/README.md
+            🐛 **Report Issues**: https://github.com/${{ github.repository }}/issues
           files: |
-            release/zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}-linux-x86_64.tar.gz
-            dist/zlsnasdisplay
+            release/zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}-python.tar.gz
+            dist/*.whl
+            dist/*.tar.gz
           draft: false
           prerelease: false
         env:

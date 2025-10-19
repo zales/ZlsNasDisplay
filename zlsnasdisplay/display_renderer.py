@@ -554,11 +554,7 @@ class DisplayRenderer:
         # Add manual code below title if provided
         if manual_code:
             code_y = title_y + 20
-            # Split code into multiple lines if needed to fit in remaining space
-            # Available width: cfg.DISPLAY_WIDTH - text_x_start - 10 (right margin)
-            max_width = cfg.DISPLAY_WIDTH - text_x_start - 10
-
-            # Try to fit in available space, split intelligently
+            # Split code into multiple lines if too long
             if len(manual_code) > 15:
                 # Split into chunks that fit
                 mid = len(manual_code) // 2

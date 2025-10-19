@@ -3,8 +3,6 @@
 import datetime
 from unittest import mock
 
-import pytest
-
 from zlsnasdisplay.system_operations import SystemOperations
 
 
@@ -26,7 +24,7 @@ class TestSystemOperations:
         with mock.patch("zlsnasdisplay.system_operations.psutil.cpu_times") as mock_cpu_times:
             with mock.patch(
                 "zlsnasdisplay.system_operations.psutil.cpu_percent"
-            ) as mock_cpu_percent:
+            ):
                 mock_cpu_times.side_effect = [initial_times, final_times]
 
                 # First call - initialize cache

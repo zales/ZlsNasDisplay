@@ -1,8 +1,7 @@
 import os
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
-from PIL import Image, ImageDraw, ImageFont
 
 from zlsnasdisplay.display_renderer import DisplayRenderer
 

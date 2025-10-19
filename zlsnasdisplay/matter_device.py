@@ -361,9 +361,8 @@ class NASMatterDevice:
             return None
 
         try:
-            from circuitmatter import pase
-            from PIL import Image
             import qrcode
+            from circuitmatter import pase
 
             # Generate QR code data
             qr_data = pase.compute_qr_code(
