@@ -37,6 +37,7 @@ MANIFEST
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 pyinstaller-build.log
+release-binary/
 
 # Installer logs
 pip-log.txt

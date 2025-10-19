@@ -89,6 +89,30 @@ poetry run python3 zlsnasdisplay
 - `avahi-utils` package for mDNS functionality: `sudo apt install avahi-utils`
 - Matter controller (Apple HomePod, Google Nest Hub, Home Assistant, etc.)
 
+### Building Standalone Binary
+
+Build a standalone binary with PyInstaller (must be run on Raspberry Pi for ARM64 compatibility):
+
+```bash
+# Build binary using the build script
+./build-binary.sh
+
+# Or manually:
+poetry run pyinstaller zlsnasdisplay.spec
+
+# Binary will be created at:
+# - dist/zlsnasdisplay (single executable, ~53MB)
+# - release-binary/zlsnasdisplay-VERSION-linux-aarch64.tar.gz (distribution package)
+```
+
+**Upload to GitHub Release:**
+```bash
+# After building on Raspberry Pi, upload to existing release
+gh release upload v3.0.0 release-binary/zlsnasdisplay-3.0.0-linux-aarch64.tar.gz
+```
+
+**Important:** Binary must be built on ARM64 architecture (Raspberry Pi) for proper compatibility. Building on x86_64 will create an incompatible binary.
+
 ### Testing
 ```bash
 # Run all tests with coverage
