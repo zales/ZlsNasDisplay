@@ -744,16 +744,22 @@ class EPD:
         for byte in data:
             self.send_data(byte)
 
-    def read_busy(self, timeout: int = 5000) -> int:  # 5000 ms default timeout
+    def read_busy(self, timeout: int = 5000) -> None:
+        """Wait for display to become ready.
+
+        Args:
+            timeout: Maximum time to wait in milliseconds (default: 5000)
+
+        Raises:
+            TimeoutError: If display remains busy after timeout period
+        """
         logger.debug("e-Paper busy")
         start_time = time.time()
         while display.digital_read(self.busy_pin) == 1:  # 0: idle, 1: busy
             if (time.time() - start_time) * 1000 > timeout:
-                logger.error("Timeout waiting for e-Paper busy.")
-                return -1
+                raise TimeoutError(f"Display remained busy after {timeout}ms timeout")
             display.delay_ms(20)
         logger.debug("e-Paper busy release")
-        return 0
 
     def turn_on_display(self) -> None:
         self.send_command(DISPLAY_UPDATE_CONTROL_2)  # DISPLAY_UPDATE_CONTROL_2
@@ -826,10 +832,14 @@ class EPD:
         self.send_data(y & 0xFF)
         self.send_data((y >> 8) & 0xFF)
 
-    def basic_init(self) -> int:
-        """Basic initialization sequence for the display"""
-        if display.module_init() != 0:
-            return -1
+    def basic_init(self) -> None:
+        """Basic initialization sequence for the display.
+
+        Raises:
+            RuntimeError: If initialization fails
+            TimeoutError: If display times out during initialization
+        """
+        display.module_init()
         self.reset()
         self.read_busy()
         self.send_command(SW_RESET)  # SWRESET
@@ -843,41 +853,49 @@ class EPD:
         self.set_window(0, 0, self.width - 1, self.height - 1)
         self.set_cursor(0, 0)
         self.read_busy()
-        return 0
 
-    def init(self) -> int:
-        """Initialize display with standard refresh mode"""
-        if self.basic_init() != 0:
-            return -1
+    def init(self) -> None:
+        """Initialize display with standard refresh mode.
+
+        Raises:
+            RuntimeError: If initialization fails
+            TimeoutError: If display times out during initialization
+        """
+        self.basic_init()
         self.set_lut(self.WS_20_30)
         self.send_command(DISPLAY_UPDATE_CONTROL_1)
         self.send_data(0x00)
         self.send_data(0x80)
-        return 0
 
-    def init_fast(self) -> int:
-        """Initialize display with fast refresh mode"""
-        if self.basic_init() != 0:
-            return -1
+    def init_fast(self) -> None:
+        """Initialize display with fast refresh mode.
+
+        Raises:
+            RuntimeError: If initialization fails
+            TimeoutError: If display times out during initialization
+        """
+        self.basic_init()
         self.send_command(BORDER_WAVEFORM_CONTROL)
         self.send_data(0x05)
         self.send_command(DISPLAY_UPDATE_CONTROL_1)
         self.send_data(0x00)
         self.send_data(0x80)
         self.set_lut(self.WF_FULL)
-        return 0
 
-    def init_4_gray(self) -> int:
-        """Initialize display with 4-level grayscale mode"""
-        if self.basic_init() != 0:
-            return -1
+    def init_4_gray(self) -> None:
+        """Initialize display with 4-level grayscale mode.
+
+        Raises:
+            RuntimeError: If initialization fails
+            TimeoutError: If display times out during initialization
+        """
+        self.basic_init()
         self.read_busy()
         self.send_command(BORDER_WAVEFORM_CONTROL)
         self.send_data(SET_SOURCE_OUTPUT_VOLTAGE)
         self.set_cursor(1, 0)
         self.read_busy()
         self.set_lut(self.Gray4)
-        return 0
 
     def get_buffer(self, image: Image.Image) -> List[int]:
         """

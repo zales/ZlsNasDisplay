@@ -48,11 +48,11 @@ class RaspberryPi:
         if pin == self.BUSY_PIN:
             return self.GPIO_BUSY_PIN.value
         elif pin == self.RST_PIN:
-            return self.RST_PIN
+            return self.GPIO_RST_PIN.value
         elif pin == self.DC_PIN:
-            return self.DC_PIN
+            return self.GPIO_DC_PIN.value
         elif pin == self.PWR_PIN:
-            return self.PWR_PIN
+            return self.GPIO_PWR_PIN.value
         return 0
 
     def delay_ms(self, delay_time: int) -> None:
@@ -67,15 +67,21 @@ class RaspberryPi:
         """Write large buffer via SPI (optimized)"""
         self.SPI.writebytes2(data)
 
-    def module_init(self) -> int:
-        """Initialize SPI and GPIO modules"""
-        self.GPIO_PWR_PIN.on()
+    def module_init(self) -> None:
+        """Initialize SPI and GPIO modules
 
-        # SPI device, bus = 0, device = 0
-        self.SPI.open(0, 0)
-        self.SPI.max_speed_hz = 4000000
-        self.SPI.mode = 0b00
-        return 0
+        Raises:
+            RuntimeError: If SPI initialization fails
+        """
+        try:
+            self.GPIO_PWR_PIN.on()
+
+            # SPI device, bus = 0, device = 0
+            self.SPI.open(0, 0)
+            self.SPI.max_speed_hz = 4000000
+            self.SPI.mode = 0b00
+        except Exception as e:
+            raise RuntimeError(f"Failed to initialize SPI/GPIO: {e}") from e
 
     def module_exit(self, cleanup: bool = False) -> None:
         """Shutdown SPI and GPIO modules"""
