@@ -32,6 +32,11 @@ a = Analysis(
         'zlsnasdisplay.waveshare_epd.epdconfig',
         # Hardware dependencies (may not be present in all environments)
         'gpiozero',
+        'gpiozero.pins',
+        'gpiozero.pins.lgpio',
+        'gpiozero.pins.rpigpio',
+        'gpiozero.pins.pigpio',
+        'gpiozero.pins.native',
         'lgpio',
         'spidev',
         # PIL/Pillow
