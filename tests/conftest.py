@@ -3,8 +3,8 @@
 import sys
 from unittest.mock import MagicMock
 
-# Mock hardware dependencies BEFORE any imports
-# This prevents GPIO/SPI initialization errors in CI environments
+# Mock hardware and system dependencies BEFORE any imports
+# This prevents GPIO/SPI/apt initialization errors in CI environments
 
 
 def mock_hardware_modules():
@@ -48,6 +48,12 @@ def mock_hardware_modules():
     mock_gpiozero.Button = MockButton
     mock_gpiozero.CPUTemperature = MagicMock
     sys.modules["gpiozero"] = mock_gpiozero
+
+    # Mock apt (Debian package manager - system-only, not in PyPI)
+    mock_apt = MagicMock()
+    mock_apt.Cache = MagicMock
+    sys.modules["apt"] = mock_apt
+    sys.modules["apt.progress"] = MagicMock()
 
 
 # Mock hardware modules before any test imports
