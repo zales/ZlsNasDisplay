@@ -378,7 +378,7 @@ optional = false
 python-versions = ">=3.11"
 groups = ["main"]
 files = []
-develop = true
+develop = false
 
 [package.dependencies]
 Adafruit-Blinka = "*"
@@ -390,8 +390,10 @@ qrcode = "*"
 optional = ["hypothesis", "pytest", "pytest-cov", "typing_extensions"]
 
 [package.source]
-type = "directory"
-url = "../../../tmp/circuitmatter_fork"
+type = "git"
+url = "https://github.com/zales/CircuitMatter.git"
+reference = "main"
+resolved_reference = "14140f75530c6919855c60183dbe1e587cc6592a"
 
 [[package]]
 name = "click"
@@ -2008,4 +2010,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "44a2c3d5db5621e4e99b340bdf1d9d5e188f9aca699c8a0b7e950208feaaa9d8"
+content-hash = "57b4ff7f51c4950310ffee0088ec8e003094935638edc5c827047766a4e75620"

@@ -17,7 +17,7 @@ spidev = "^3.7"
 fastapi = "^0.115.0"
 uvicorn = {extras = ["standard"], version = "^0.34.0"}
 lgpio = "^0.2.2.0"
-circuitmatter = {path = "/tmp/circuitmatter_fork", develop = true}
+circuitmatter = {git = "https://github.com/zales/CircuitMatter.git", branch = "main"}
 cryptography = ">=41.0.0"
 qrcode = {extras = ["pil"], version = "^8.0"}
 
