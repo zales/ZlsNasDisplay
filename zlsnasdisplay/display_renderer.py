@@ -520,3 +520,57 @@ class DisplayRenderer:
         self.draw.text((160, 71), "Loading...", font=self.font14, fill=0)
 
         self.update_display_and_save_image()
+
+    def show_qr_code(self, qr_img: Image.Image, manual_code: str | None = None) -> None:
+        """Display Matter commissioning QR code on the e-ink display.
+
+        Args:
+            qr_img: PIL Image of the QR code
+            manual_code: Optional manual pairing code to display
+        """
+        # Clear the display
+        self.draw.rectangle((0, 0, cfg.DISPLAY_WIDTH, cfg.DISPLAY_HEIGHT), fill=255)
+
+        # Convert QR code to 1-bit mode to match display
+        qr_img_1bit = qr_img.convert("1")
+
+        # Layout: QR code on the left, text on the right
+        # E-ink display is 296x128 pixels
+        qr_width, qr_height = qr_img_1bit.size
+
+        # Position QR code on the left side with margin
+        qr_x_offset = 10
+        qr_y_offset = (cfg.DISPLAY_HEIGHT - qr_height) // 2  # Vertically center
+
+        # Paste QR code onto the image
+        self.image.paste(qr_img_1bit, (qr_x_offset, qr_y_offset))
+
+        # Text area starts after QR code
+        text_x_start = qr_x_offset + qr_width + 10
+
+        # Add title on the right side
+        title = "Matter Setup"
+        title_y = qr_y_offset + 10
+        self.draw.text((text_x_start, title_y), title, font=self.font14, fill=0)
+
+        # Add manual code below title if provided
+        if manual_code:
+            code_y = title_y + 20
+            # Split code into multiple lines if needed to fit in remaining space
+            # Available width: cfg.DISPLAY_WIDTH - text_x_start - 10 (right margin)
+            max_width = cfg.DISPLAY_WIDTH - text_x_start - 10
+
+            # Try to fit in available space, split intelligently
+            if len(manual_code) > 15:
+                # Split into chunks that fit
+                mid = len(manual_code) // 2
+                line1 = manual_code[:mid]
+                line2 = manual_code[mid:]
+
+                self.draw.text((text_x_start, code_y), line1, font=self.font14, fill=0)
+                self.draw.text((text_x_start, code_y + 16), line2, font=self.font14, fill=0)
+            else:
+                self.draw.text((text_x_start, code_y), manual_code, font=self.font14, fill=0)
+
+        # Update the display
+        self.update_display_and_save_image()
