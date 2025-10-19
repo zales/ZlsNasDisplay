@@ -52,12 +52,8 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         cache: "poetry"
-    - name: Install system dependencies
-      run: |
-        # Install fake GPIO libraries for testing without hardware
-        pip install gpiozero --no-deps
     - name: Install Dependencies
-      run: poetry install
+      run: poetry install --with dev
     - name: Run tests with mocked GPIO
       env:
         # Use mock pin factory for gpiozero in CI
