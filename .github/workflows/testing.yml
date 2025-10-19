@@ -5,6 +5,7 @@ on:
     branches:
     - main
   pull_request:
+
 jobs:
   linting:
     runs-on: ubuntu-latest
@@ -27,15 +28,15 @@ jobs:
       run: poetry run ruff format zlsnasdisplay tests --check
     - name: Lint with ruff
       run: poetry run ruff check .
-    - name: mypy check
-      run: poetry run mypy .
+    - name: Type check with mypy
+      run: poetry run mypy zlsnasdisplay --exclude 'waveshare_epd'
       continue-on-error: true
+
   testing:
-    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11"]
+        python-version: ["3.11", "3.12", "3.13"]
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
@@ -51,13 +52,24 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         cache: "poetry"
+    - name: Install system dependencies
+      run: |
+        # Install fake GPIO libraries for testing without hardware
+        pip install gpiozero --no-deps
     - name: Install Dependencies
       run: poetry install
-    - name: Run tests
-      run: poetry run pytest -v --cov-report=xml --cov-report=term-missing
+    - name: Run tests with mocked GPIO
+      env:
+        # Use mock pin factory for gpiozero in CI
+        GPIOZERO_PIN_FACTORY: mock
+      run: |
+        # Ignore build directories and Matter tests (require CircuitMatter runtime)
+        poetry run pytest -v --cov-report=xml --cov-report=term-missing \
+          --ignore=deb_dist --ignore=dist --ignore=debian \
+          --ignore=tests/test_matter_device.py
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
-      if: matrix.python-version == '3.11'
+      if: matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
       with:
         files: ./coverage.xml
         flags: unittests

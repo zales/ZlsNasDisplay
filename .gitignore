@@ -157,6 +157,3 @@ RELEASE.md
 
 # Scripts directory
 scripts/
-
-# GitHub workflows (if not using CI/CD)
-.github/workflows/
