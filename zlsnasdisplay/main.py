@@ -156,12 +156,14 @@ def main() -> int:
             matter_device.process_packets()
             # Shorter sleep when Matter is active for responsive packet processing
             # Use min of idle_seconds or 0.01s to avoid unnecessary schedule checks
-            sleep_time = min(schedule.idle_seconds() or 0.01, 0.01)
+            idle = schedule.idle_seconds()
+            sleep_time = min(max(idle, 0) if idle is not None else 0.01, 0.01)
             time.sleep(sleep_time)
         else:
             # Longer sleep when Matter is disabled to reduce CPU usage
             # Sleep until next scheduled task is due (max 1 second)
-            sleep_time = min(schedule.idle_seconds() or 1, 1)
+            idle = schedule.idle_seconds()
+            sleep_time = min(max(idle, 0) if idle is not None else 1, 1)
             time.sleep(sleep_time)
 
 
