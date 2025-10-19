@@ -26,6 +26,22 @@ if not Config.is_root():
 
 display_renderer = DisplayRenderer(Config.DISPLAY_IMAGE_PATH, Config.is_root())
 
+# Initialize Matter device if enabled
+matter_device = None
+if Config.ENABLE_MATTER:
+    from zlsnasdisplay.matter_device import create_matter_device
+
+    matter_device = create_matter_device(
+        device_name=Config.MATTER_DEVICE_NAME,
+        vendor_id=Config.MATTER_VENDOR_ID,
+        product_id=Config.MATTER_PRODUCT_ID,
+    )
+    if matter_device:
+        logging.info("Matter integration enabled")
+    else:
+        logging.warning("Matter integration requested but failed to initialize")
+
+
 # Define signal_handler function to catch SIGINT (Ctrl+C)
 def signal_handler(_sig: int, _frame: object) -> None:
     """Signal handler function to catch SIGINT (Ctrl+C) and exit the program."""
@@ -76,6 +92,26 @@ def main() -> int:
     else:
         logging.info("Web dashboard disabled. Set ENABLE_WEB_DASHBOARD=true to enable it.")
 
+    # Start Matter device if enabled
+    if Config.ENABLE_MATTER and matter_device:
+        logging.info("Starting Matter device - ready for commissioning")
+        matter_device.start(
+            vendor_id=Config.MATTER_VENDOR_ID,
+            product_id=Config.MATTER_PRODUCT_ID
+        )
+
+        # Display QR code on e-ink display for 30 seconds
+        qr_img = matter_device.get_qr_code_image(box_size=3)
+        manual_code = matter_device.get_manual_code()
+
+        if qr_img:
+            logging.info("Displaying Matter QR code on e-ink display for 30 seconds")
+            logging.info(f"Manual pairing code: {manual_code}")
+            display_renderer.show_qr_code(qr_img, manual_code)
+            time.sleep(30)  # Show QR code for 30 seconds
+    else:
+        logging.info("Matter integration disabled. Set ENABLE_MATTER=true to enable it.")
+
     display_renderer.startup()
 
     # Render current traffic every 10 seconds
@@ -101,13 +137,28 @@ def main() -> int:
     # Update display
     schedule.every(2).seconds.do(display_renderer.update_display_and_save_image)
 
+    # Update Matter metrics if enabled
+    if Config.ENABLE_MATTER and matter_device:
+
+        def update_matter_metrics() -> None:
+            """Update Matter device metrics."""
+            if matter_device:
+                matter_device.update_metrics()
+
+        schedule.every(Config.MATTER_UPDATE_INTERVAL).seconds.do(update_matter_metrics)
+
     display_renderer.render_grid()
     schedule.run_all()
 
     while True:
         """Run the scheduled tasks."""
         schedule.run_pending()
-        time.sleep(1)
+
+        # Process Matter packets if enabled (non-blocking)
+        if Config.ENABLE_MATTER and matter_device:
+            matter_device.process_packets()
+
+        time.sleep(0.1)  # Reduced sleep for Matter packet processing
 
 
 if __name__ == "__main__":

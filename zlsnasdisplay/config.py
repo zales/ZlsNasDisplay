@@ -52,6 +52,20 @@ class Config:
         os.getenv("HISTORY_MAX_ENTRIES", "1800")
     )  # 1 hour at 2s intervals
 
+    # Matter integration configuration
+    ENABLE_MATTER: bool = os.getenv("ENABLE_MATTER", "false").lower() in (
+        "true",
+        "1",
+        "yes",
+    )
+    MATTER_DEVICE_NAME: str = os.getenv("MATTER_DEVICE_NAME", "ZlsNAS")
+    # CircuitMatter currently only supports these test vendor/product IDs
+    MATTER_VENDOR_ID: int = int(os.getenv("MATTER_VENDOR_ID", "0xFFF4"), 0)
+    MATTER_PRODUCT_ID: int = int(os.getenv("MATTER_PRODUCT_ID", "0x1234"), 0)
+    MATTER_UPDATE_INTERVAL: int = int(
+        os.getenv("MATTER_UPDATE_INTERVAL", "30")
+    )  # seconds between metric updates
+
     @classmethod
     def is_root(cls) -> bool:
         """Check if running as root user."""
@@ -117,6 +131,16 @@ class Config:
         if cls.HISTORY_MAX_ENTRIES > 10000:
             warnings.append(
                 f"HISTORY_MAX_ENTRIES={cls.HISTORY_MAX_ENTRIES} may use excessive memory (> 10000)"
+            )
+
+        # Matter configuration validation
+        if cls.MATTER_UPDATE_INTERVAL < 5 and cls.ENABLE_MATTER:
+            warnings.append(
+                f"MATTER_UPDATE_INTERVAL={cls.MATTER_UPDATE_INTERVAL}s is too low (min 5s)"
+            )
+        if cls.MATTER_UPDATE_INTERVAL > 300 and cls.ENABLE_MATTER:
+            warnings.append(
+                f"MATTER_UPDATE_INTERVAL={cls.MATTER_UPDATE_INTERVAL}s is very high (> 300s)"
             )
 
         return warnings

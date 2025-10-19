@@ -136,3 +136,27 @@ dmypy.json
 # editors
 .idea
 .vscode
+
+# Debian packaging
+deb_dist/
+debian/
+*.deb
+stdeb.cfg
+MANIFEST.in
+setup.py
+
+# Build artifacts
+*.tar.gz
+
+# Matter device state
+matter-device-state.json
+
+# Release/documentation files (project-specific)
+CIRCUITMATTER_IMPROVEMENTS.md
+RELEASE.md
+
+# Scripts directory
+scripts/
+
+# GitHub workflows (if not using CI/CD)
+.github/workflows/

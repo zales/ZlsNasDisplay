@@ -57,7 +57,7 @@ The application renders real-time system statistics on a Waveshare 2.9" e-ink di
 - Values exceeding critical thresholds are highlighted with inverted colors (white text on black background)
 - Provides instant visual feedback when system resources need attention
 
-### Web Dashboard (NEW!)
+### Web Dashboard
 Access your NAS metrics remotely via a modern, responsive web interface with real-time updates.
 
 - **Real-time monitoring** via WebSocket (2-second updates)
@@ -77,6 +77,37 @@ sudo python3 -m zlsnasdisplay
 # Access at http://<raspberry-pi-ip>:8000
 ```
 
+### Matter Smart Home Integration (NEW!)
+Expose your NAS metrics as Matter-compatible sensors for seamless smart home integration.
+
+- **Compatible with major platforms**: Apple Home, Google Home, Home Assistant, Amazon Alexa
+- **Standard Matter sensors**: Temperature sensors for CPU and NVMe
+- **Easy commissioning**: Scan QR code to add device
+- **Real-time updates**: Metrics update every 30 seconds (configurable)
+- **Pure Python implementation**: Uses CircuitMatter for Matter protocol
+
+**Enable Matter integration:**
+```bash
+# Install avahi-utils for mDNS support
+sudo apt install avahi-utils
+
+# Enable Matter device
+export ENABLE_MATTER=true
+
+# Run the application
+sudo python3 -m zlsnasdisplay
+
+# Scan the QR code displayed in console with your Matter controller
+```
+
+**Exposed Sensors:**
+- CPU Temperature (°C)
+- NVMe SSD Temperature (°C)
+
+**Requirements:**
+- Python 3.11+ (CircuitMatter requirement)
+- Matter controller (Apple HomePod, Google Nest Hub, Home Assistant, etc.)
+
 ## Hardware
 Raspberry Pi (5 tested)
 
@@ -91,9 +122,10 @@ All necessary information about the wiring and operation is available on the [wa
 
 ### Dependencies
 
-*   `python`: Python version required for the project (>=3.9).
+*   `python`: Python version required for the project (>=3.11 for Matter support, >=3.9 otherwise).
 *   `pillow`, `gpiozero`, `schedule`, `psutil`, `requests`, `spidev`, `lgpio`: Python dependencies for display and system monitoring.
 *   `fastapi`, `uvicorn`: Optional dependencies for the web dashboard feature.
+*   `circuitmatter`, `cryptography`: Optional dependencies for Matter smart home integration.
 *   `mypy`, `pre-commit`, `pytest`, `pytest-cov`, `ruff`, `tomli`: Development dependencies for linting, testing, and formatting.
 
 #### Build System
@@ -184,6 +216,13 @@ export ENABLE_WEB_DASHBOARD=true
 export WEB_DASHBOARD_HOST=0.0.0.0
 export WEB_DASHBOARD_PORT=8000
 
+# Matter integration (optional, requires Python 3.11+)
+export ENABLE_MATTER=true
+export MATTER_DEVICE_NAME="ZlsNAS"
+export MATTER_VENDOR_ID="0xFFF1"
+export MATTER_PRODUCT_ID="0x8001"
+export MATTER_UPDATE_INTERVAL="30"  # seconds
+
 # Logging
 export LOG_LEVEL=INFO
 
@@ -206,6 +245,7 @@ To run ZlsNasDisplay automatically on boot, create a systemd service:
     User=root
     WorkingDirectory=/path/to/ZlsNasDisplay
     Environment="ENABLE_WEB_DASHBOARD=true"
+    Environment="ENABLE_MATTER=true"
     Environment="LOG_LEVEL=INFO"
     ExecStart=/usr/bin/python3 -m zlsnasdisplay
     Restart=always
