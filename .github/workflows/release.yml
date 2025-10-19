@@ -151,18 +151,14 @@ jobs:
 
             ### Using pip (Recommended for Python users)
             ```bash
+            # Standard installation (includes GPIO hardware support)
             pip install zlsnasdisplay==${{ steps.get_version.outputs.VERSION }}
-
-            # On Raspberry Pi with GPIO hardware:
-            pip install "zlsnasdisplay[hardware]==${{ steps.get_version.outputs.VERSION }}"
             ```
 
             ### Using Poetry
             ```bash
+            # Standard installation (includes GPIO hardware support)
             poetry add zlsnasdisplay@${{ steps.get_version.outputs.VERSION }}
-
-            # With hardware support:
-            poetry add zlsnasdisplay@${{ steps.get_version.outputs.VERSION }} --extras hardware
             ```
 
             ### From source
@@ -170,7 +166,7 @@ jobs:
             git clone https://github.com/${{ github.repository }}.git
             cd ZlsNasDisplay
             git checkout v${{ steps.get_version.outputs.VERSION }}
-            poetry install -E hardware  # On Raspberry Pi
+            poetry install
             poetry run zlsnasdisplay
             ```
 

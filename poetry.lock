@@ -874,10 +874,9 @@ files = [
 name = "lgpio"
 version = "0.2.2.0"
 description = "Linux SBC GPIO module"
-optional = true
+optional = false
 python-versions = "*"
 groups = ["main"]
-markers = "extra == \"hardware\""
 files = [
     {file = "lgpio-0.2.2.0-cp310-cp310-linux_armv7l.whl", hash = "sha256:97fe5fb0e888c96031e8899e8c0eca64c63076a6d1f1e774acad8696430b2ff6"},
     {file = "lgpio-0.2.2.0-cp310-cp310-manylinux_2_34_aarch64.whl", hash = "sha256:f8f1a2818ed4293182999679ac8559aea70d45743f5a3ae8025837e529d9e0d4"},
@@ -2164,10 +2163,7 @@ files = [
     {file = "websockets-15.0.1.tar.gz", hash = "sha256:82544de02076bafba038ce055ee6412d68da13ab47f0c60cab827346de828dee"},
 ]
 
-[extras]
-hardware = ["lgpio"]
-
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "57693d150c762f238cdc4b79d20b36c490b279b7b28d34e9a5255aee71a53660"
+content-hash = "61f312b7a0596c698d9957b6e536d8553fb67fc3d94199f7cd96b22510d78594"
