@@ -22,9 +22,7 @@ class TestSystemOperations:
         final_times = CPUTimes(user=1300.0, nice=60.0, system=690.0, idle=3400.0, iowait=550.0)
 
         with mock.patch("zlsnasdisplay.system_operations.psutil.cpu_times") as mock_cpu_times:
-            with mock.patch(
-                "zlsnasdisplay.system_operations.psutil.cpu_percent"
-            ):
+            with mock.patch("zlsnasdisplay.system_operations.psutil.cpu_percent"):
                 mock_cpu_times.side_effect = [initial_times, final_times]
 
                 # First call - initialize cache
