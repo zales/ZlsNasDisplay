@@ -95,10 +95,7 @@ def main() -> int:
     # Start Matter device if enabled
     if Config.ENABLE_MATTER and matter_device:
         logging.info("Starting Matter device - ready for commissioning")
-        matter_device.start(
-            vendor_id=Config.MATTER_VENDOR_ID,
-            product_id=Config.MATTER_PRODUCT_ID
-        )
+        matter_device.start(vendor_id=Config.MATTER_VENDOR_ID, product_id=Config.MATTER_PRODUCT_ID)
 
         # Display QR code on e-ink display for 30 seconds
         qr_img = matter_device.get_qr_code_image(box_size=3)

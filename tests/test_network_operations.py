@@ -193,9 +193,7 @@ wlan0: invalid data
 
     def test_get_ip_address_generic_exception(self):
         """Test IP address retrieval with generic exception."""
-        with mock.patch(
-            "zlsnasdisplay.network_operations.psutil.net_if_addrs"
-        ) as mock_net_if:
+        with mock.patch("zlsnasdisplay.network_operations.psutil.net_if_addrs") as mock_net_if:
             mock_net_if.side_effect = Exception("Unexpected error")
 
             result = NetworkOperations.get_ip_address()

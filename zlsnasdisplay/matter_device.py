@@ -37,6 +37,7 @@ except ImportError as e:
 
         pass
 
+
 from zlsnasdisplay.network_operations import NetworkOperations, TrafficMonitor
 from zlsnasdisplay.system_operations import SystemOperations
 
@@ -288,9 +289,7 @@ class NASMatterDevice:
         self.traffic_monitor = TrafficMonitor()
 
         # Create Matter sensors with descriptive names
-        self.cpu_temp_sensor = CPUTemperatureSensor(
-            "CPU Temperature", self.system_ops
-        )
+        self.cpu_temp_sensor = CPUTemperatureSensor("CPU Temperature", self.system_ops)
         self.nvme_temp_sensor = NVMeTemperatureSensor("NVMe Temperature")
         self.cpu_load_sensor = CPULoadSensor("CPU Load", self.system_ops)
         self.memory_sensor = MemoryUsageSensor("Memory Usage", self.system_ops)
@@ -309,9 +308,7 @@ class NASMatterDevice:
         cm_logger.setLevel(logging.INFO)
 
         self.matter = cm.CircuitMatter(
-            vendor_id=vendor_id,
-            product_id=product_id,
-            product_name=self.device_name
+            vendor_id=vendor_id, product_id=product_id, product_name=self.device_name
         )
 
         # Add all sensor devices
@@ -360,7 +357,7 @@ class NASMatterDevice:
         Returns:
             PIL Image object or None if not available
         """
-        if not CIRCUITMATTER_AVAILABLE or not hasattr(self, 'discriminator'):
+        if not CIRCUITMATTER_AVAILABLE or not hasattr(self, "discriminator"):
             return None
 
         try:
@@ -370,10 +367,7 @@ class NASMatterDevice:
 
             # Generate QR code data
             qr_data = pase.compute_qr_code(
-                self.vendor_id,
-                self.product_id,
-                self.discriminator,
-                self.passcode
+                self.vendor_id, self.product_id, self.discriminator, self.passcode
             )
 
             # Create QR code
@@ -397,7 +391,7 @@ class NASMatterDevice:
 
     def get_manual_code(self) -> Optional[str]:
         """Get the manual pairing code for Matter commissioning."""
-        if not CIRCUITMATTER_AVAILABLE or not hasattr(self, 'passcode'):
+        if not CIRCUITMATTER_AVAILABLE or not hasattr(self, "passcode"):
             return None
         # PersistentDictionary uses dict access syntax
         if self.matter and "manual_code" in self.matter.nonvolatile:

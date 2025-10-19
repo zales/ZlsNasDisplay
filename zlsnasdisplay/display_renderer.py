@@ -441,9 +441,7 @@ class DisplayRenderer:
         """Render full IP address"""
         self.draw.rectangle((20, 113, 123, 126), fill=255)
 
-        ip_address = self._get_cached_value(
-            "ip_address", lambda: self.network_ops.get_ip_address()
-        )
+        ip_address = self._get_cached_value("ip_address", lambda: self.network_ops.get_ip_address())
 
         if ip_address:
             self.draw.text((cfg.IP_VALUE_X, cfg.IP_VALUE_Y), ip_address, font=self.font14, fill=0)
