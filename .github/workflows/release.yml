@@ -1,0 +1,167 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Trigger on version tags like v3.0.0, v3.1.0, etc.
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ['3.11']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.8.3
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Load cached dependencies
+        id: cached-poetry-dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+
+      - name: Install project
+        run: poetry install --no-interaction
+
+      - name: Install PyInstaller
+        run: poetry run pip install pyinstaller
+
+      - name: Run tests
+        run: poetry run pytest tests/test_network_operations.py tests/test_system_operations.py -v
+
+      - name: Build binary with PyInstaller
+        run: |
+          poetry run pyinstaller --name zlsnasdisplay \
+            --onefile \
+            --add-data "zlsnasdisplay/fonts:zlsnasdisplay/fonts" \
+            --hidden-import=zlsnasdisplay.waveshare_epd \
+            --hidden-import=zlsnasdisplay.waveshare_epd.epd2in9_V2 \
+            --hidden-import=zlsnasdisplay.waveshare_epd.epdconfig \
+            --hidden-import=gpiozero \
+            --hidden-import=lgpio \
+            --hidden-import=PIL \
+            --hidden-import=PIL.Image \
+            --hidden-import=PIL.ImageDraw \
+            --hidden-import=PIL.ImageFont \
+            --hidden-import=psutil \
+            --hidden-import=schedule \
+            --hidden-import=fastapi \
+            --hidden-import=uvicorn \
+            --collect-all zlsnasdisplay \
+            --strip \
+            zlsnasdisplay/__main__.py
+
+      - name: Extract version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create tarball
+        run: |
+          mkdir -p release/zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}
+          cp dist/zlsnasdisplay release/zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}/
+          cp README.md release/zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}/
+          cp LICENSE release/zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}/
+          cd release
+          tar -czf zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}-linux-x86_64.tar.gz zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get the previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+            git log --pretty=format:"- %s (%h)" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+            git log ${PREV_TAG}..HEAD --pretty=format:"- %s (%h)" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release v${{ steps.get_version.outputs.VERSION }}
+          body: |
+            # ZlsNasDisplay v${{ steps.get_version.outputs.VERSION }}
+
+            ## 📦 Installation
+
+            ### Binary (Linux x86_64)
+            ```bash
+            # Download and extract
+            wget https://github.com/${{ github.repository }}/releases/download/v${{ steps.get_version.outputs.VERSION }}/zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}-linux-x86_64.tar.gz
+            tar -xzf zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}-linux-x86_64.tar.gz
+            cd zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}
+
+            # Run
+            ./zlsnasdisplay
+            ```
+
+            ### From PyPI
+            ```bash
+            pip install zlsnasdisplay==${{ steps.get_version.outputs.VERSION }}
+            ```
+
+            ### From source
+            ```bash
+            git clone https://github.com/${{ github.repository }}.git
+            cd ZlsNasDisplay
+            git checkout v${{ steps.get_version.outputs.VERSION }}
+            poetry install
+            poetry run zlsnasdisplay
+            ```
+
+            ## 📝 What's Changed
+
+            ${{ steps.changelog.outputs.CHANGELOG }}
+
+            ## 🔧 Requirements
+
+            - Python 3.9+
+            - Raspberry Pi with Waveshare 2.9" e-ink display
+            - Optional: Root privileges for apt updates
+
+            ## 🌐 Web Dashboard
+
+            Enable the web dashboard:
+            ```bash
+            ENABLE_WEB_DASHBOARD=true ./zlsnasdisplay
+            # Access at http://<raspberry-pi-ip>:8000
+            ```
+
+            **Full Changelog**: https://github.com/${{ github.repository }}/compare/${{ steps.get_version.outputs.PREV_TAG }}...v${{ steps.get_version.outputs.VERSION }}
+          files: |
+            release/zlsnasdisplay-${{ steps.get_version.outputs.VERSION }}-linux-x86_64.tar.gz
+            dist/zlsnasdisplay
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
